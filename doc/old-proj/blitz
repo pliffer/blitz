@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+const spawn = require('child_process').spawn;
+const colors = require('colors');
+
+const processFile = process.argv[2];
+
+if(!processFile) return console.warn('No Input file');
+
+function initFork(){
+
+    var child = spawn('node', [processFile]);
+
+    var scriptOutput = "";
+
+    child.stdout.setEncoding('utf8');
+
+    child.stdout.on('data', function(data){
+
+        console.log('stdout: ' + data);
+
+        data = data.toString();
+
+        scriptOutput+=data;
+        
+    });
+
+    child.stderr.setEncoding('utf8');
+
+    child.stderr.on('data', function(data){
+
+        console.log('stderr: ' + data);
+
+        data=data.toString();
+
+        scriptOutput+=data;
+
+    });
+
+    child.on('close', function(code) {
+
+        console.log("\nBlitz - Reiniciando\n".green);
+
+        initFork();
+
+    });
+
+}
+
+initFork();

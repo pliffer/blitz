@@ -1,0 +1,20 @@
+{
+  "name": "blitz",
+  "version": "1.0.0",
+  "description": "Analisador de texto",
+  "main": "blitz.js",
+  "preferGlobal": true,
+  "bin": "blitz.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/pliffer/blitz.git"
+  },
+  "author": "Pliffer Software",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "homepage": "https://bitbucket.org/pliffer/blitz#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "commander": "^7.2.0",
+    "fs-extra": "^10.0.0"
+  }
+}
