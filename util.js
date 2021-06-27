@@ -48,7 +48,7 @@ let Util = {
 
 	},
 
-    ignorableExt: ['.log', '.pdf', '.xlsx', '.xls', '.ods', '.png', '.jpg', '.jpeg', '.bmp', '.mp3', '.ogg'],
+    ignorableExt: ['.log', '.pdf', '.xlsx', '.xls', '.ods', '.png', '.jpg', '.jpeg', '.bmp', '.mp3', '.ogg', '.xml'],
 
     forEachEntry(entriesPath, callback){
 
@@ -62,6 +62,7 @@ let Util = {
                 if(/platforms\/android/.test(entryPath)) return;
                 if(/\.git/.test(entryPath)) return;
                 if(/plugins\/cordova/.test(entryPath)) return;
+                if(/cache/.test(entryPath)) return;
 
                 let ext = path.extname(entry);
 
@@ -112,7 +113,84 @@ let Util = {
 
 		});
 
-	}
+	},
+
+    fileDiff(file1, file2){
+
+        return new Promise(async (resolve, reject) => {
+
+            let data1 = await fs.readFileSync(file1, 'utf-8');
+            let data2 = await fs.readFileSync(file2, 'utf-8');
+
+            data1 = data1.split("\n");
+            data2 = data2.split("\n");
+
+            let lines = data1.length;
+
+            if(data2.length > lines){
+
+                lines = data2.length;
+
+            }
+
+            let err    = false;
+            let result = [];
+
+            for(let i = 0; i < lines; i++){
+
+                if(err) continue;
+
+                if(data1[i] != data2[i]){
+
+                    err = true;
+
+                    let maxLength = data1[i].length;
+
+                    if(data2[i].length > maxLength) maxLength = data2[i].length;
+
+                    let letterErr = false;
+                    let part1Err  = '';
+                    let part2Err  = '';
+
+                    for(let l = 0; l < maxLength; l++){
+
+                        if(letterErr) continue;
+
+                        let part1 = data1[i].substr(0, l);
+                        let part2 = data2[i].substr(0, l);
+
+                        if(part1 !== part2){
+
+                            part1Err = part1;
+                            part2Err = data1[i].substr(l);
+                            letterErr = true;
+
+                        }
+
+                    }
+
+                    result.push({
+                        line: i,
+                        part1: part1Err,
+                        part2: part2Err
+                    });
+
+                }
+
+            }
+
+            return resolve(result);
+
+        });
+
+    },
+    
+    lineLog(msg){
+
+        process.stdout.write(`\r${msg}`);
+
+    }
+
 
 }
 
