@@ -1,5 +1,6 @@
 const path = require('path');
 const fs   = require('fs-extra');
+const cp   = require('child_process');
 
 let Util = {
 
@@ -50,7 +51,9 @@ let Util = {
 
     ignorableExt: ['.log', '.pdf', '.xlsx', '.xls', '.ods', '.png', '.jpg', '.jpeg', '.bmp', '.mp3', '.ogg', '.xml'],
 
-    forEachEntry(entriesPath, callback){
+    forEachEntry(entriesPath, callback, opt = {}){
+
+        if(!opt.content) opt.content = true;
 
         return new Promise((resolve, reject) => {
 
@@ -80,8 +83,16 @@ let Util = {
                     Util.forEachEntry(entryPath, callback);
 
                 } else{
-                    
-                    callback(entryPath, fs.readFileSync(entryPath, 'utf-8'));
+
+                    if(opt.content){
+                        
+                        callback(entryPath, fs.readFileSync(entryPath, 'utf-8'));
+
+                    } else{
+
+                        callback(entryPath);
+
+                    }                    
 
                 }
 
@@ -189,8 +200,107 @@ let Util = {
 
         process.stdout.write(`\r${msg}`);
 
-    }
+    },
 
+    listCached(folder){
+
+        let filepath = path.join(__dirname, 'cache', folder);
+
+        return fs.readdir(filepath).catch(e => {
+
+            console.log(`@err ${e.toString()}`);
+
+            throw e;
+
+        });
+
+    },
+
+    setCache(folder, filename, object){
+
+        let cacheDir = path.join(__dirname, 'cache', folder);
+
+        return fs.ensureDir(cacheDir).then(() => {
+
+            let filepath = path.join(cacheDir, filename + '.json');
+
+            return fs.writeJson(filepath, object);
+
+        }).catch(e => {
+
+            console.log(`@err ${e.toString()}`);
+
+            throw e;
+
+        });
+
+    },
+
+    getCache(folder, file){
+
+        let sufix = '.json';
+
+        if(file.substr(-5) == '.json') sufix = '';
+
+        let filepath = path.join(__dirname, 'cache', folder, file + sufix);
+
+        return fs.exists(filepath).then(exists => {
+
+            if(!exists) return Promise.reject(file + ' not cached at ' + folder);
+
+            return fs.readJson(filepath);
+
+        }).catch(e => {
+
+            console.log(`@err ${e.toString()}`);
+
+            throw e;
+
+        });
+
+    },
+
+    inheritSpawn(args, callback = () => {}){
+
+        return new Promise((resolve, reject) => {
+
+            let spawn = cp.spawn(args.shift(), args, {
+                stdio: ['inherit', 'inherit', 'inherit']
+            });
+
+            callback(spawn);
+
+            spawn.on('exit', resolve);
+            spawn.on('error', reject);
+
+        });
+
+    },
+
+    spawn(args, dataCallback = () => {}){
+
+        return new Promise((resolve, reject) => {
+
+            let spawn = cp.spawn(args.shift(), args);
+
+            spawn.stdout.on('data', (data) => {
+
+                dataCallback(data.toString(), 'data');
+
+            });
+
+            spawn.stderr.on('data', (data) => {
+
+                dataCallback(data.toString(), 'err');
+
+            });
+
+            spawn.on('exit', resolve);
+            spawn.on('error', reject);
+
+        });
+
+    }
 
 }
 

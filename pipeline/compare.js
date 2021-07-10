@@ -103,6 +103,7 @@ module.exports = {
                     if(~diff.filename.indexOf('.logs/')) return;
                     if(~diff.filename.indexOf('.pem/')) return;
                     if(~diff.filename.indexOf('LICENSE.md')) return;
+                    if(~diff.filename.indexOf('README.md')) return;
                     if(~diff.filename.indexOf('package.json')) return;
                     if(~diff.filename.indexOf('package-lock.json')) return;
                     if(~diff.filename.indexOf('sftp-config.json')) return;
@@ -128,6 +129,12 @@ module.exports = {
                     if(~notFound[1].indexOf('/modules/')) return;
                     if(~notFound[1].indexOf('/doc/')) return;
                     if(~notFound[1].indexOf('/.logs/')) return;
+                    if(~notFound[1].indexOf('/.env/')) return;
+                    if(~notFound[1].indexOf('/sftp-config.json/')) return;
+                    if(~notFound[1].indexOf('/LICENSE.md/')) return;
+                    if(~notFound[1].indexOf('/README.md/')) return;
+                    if(~notFound[1].indexOf('/.pem/')) return;
+
 
                 }
 
