@@ -1,8 +1,3 @@
-let dotenv = require('dotenv');
-let path   = require('path');
-let fs     = require('fs-extra');
-let cp     = require('child_process');
-
 let Util = require('../util.js');
 
 module.exports = {
@@ -15,25 +10,20 @@ module.exports = {
 
     },
 
-    run(){
+    async run(){
 
-        let envPath = path.join(process.cwd(), '.env');
+        let env = await Util.getEnv();
 
-        if(!fs.existsSync(envPath)){
-
-            return console.log(`@err There's no .env on this folder to be parsed`);
-
-        }
-
-        let envBuffer = fs.readFileSync(envPath);
-
-        let env = dotenv.parse(envBuffer);
+        if(!env) return;
 
         if(!env.MYSQL_PASS || !env.MYSQL_USER || !env.MYSQL_HOST || !env.MYSQL_DB){
 
             return console.log(`@err It is required the four properties: MYSQL_PASS, MYSQL_USER, MYSQL_HOST, MYSQL_DB`);
 
         }
+
+        console.log(`@info ${env.MYSQL_USER.green}@${env.MYSQL_HOST.green} (db: ${env.MYSQL_DB.green})`);
+        console.log(`\n`);
 
         Util.inheritSpawn(['mysql', '-h', env.MYSQL_HOST, '-u', env.MYSQL_USER, '-p' + env.MYSQL_PASS, '-A', env.MYSQL_DB]);
 

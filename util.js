@@ -1,6 +1,7 @@
-const path = require('path');
-const fs   = require('fs-extra');
-const cp   = require('child_process');
+const dotenv = require('dotenv');
+const path   = require('path');
+const fs     = require('fs-extra');
+const cp     = require('child_process');
 
 let Util = {
 
@@ -257,6 +258,24 @@ let Util = {
             throw e;
 
         });
+
+    },
+
+    getEnv(){
+
+        let envPath = path.join(process.cwd(), '.env');
+
+        if(!fs.existsSync(envPath)){
+
+            console.log(`@err There's no .env on this folder to be parsed`)
+
+            return false;
+
+        }
+
+        let envBuffer = fs.readFileSync(envPath);
+
+        return dotenv.parse(envBuffer);
 
     },
 
