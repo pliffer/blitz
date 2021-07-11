@@ -20,6 +20,10 @@ let Util = {
 
 	},
 
+    random(min, max){
+        return Math.floor(Math.random()*(max-min+1)+min);
+    },
+
 	populateRecursively(entriesPath, entries){
 
 		return new Promise((resolve, reject) => {
@@ -204,6 +208,16 @@ let Util = {
 
     },
 
+    randomCached(folder){
+
+        return module.exports.listCached(folder).then(list => {
+
+            return module.exports.getCache(folder, list[module.exports.random(0, list.length-1)]);
+
+        });
+
+    },
+
     listCached(folder){
 
         let filepath = path.join(__dirname, 'cache', folder);
@@ -280,13 +294,27 @@ let Util = {
 
     },
 
-    inheritSpawn(args, callback = () => {}){
+    inheritSpawn(args, additionalOpts){
+
+        let opts = {
+            stdio: ['inherit', 'inherit', 'inherit']
+        };
+
+        let callback = () => {};
+
+        if(additionalOpts){
+
+            if(additionalOpts.callback) callback = additionalOpts.callback;
+
+            delete additionalOpts.callback;
+
+            for(opt in additionalOpts) opts[opt] = additionalOpts[opt];
+
+        }
 
         return new Promise((resolve, reject) => {
 
-            let spawn = cp.spawn(args.shift(), args, {
-                stdio: ['inherit', 'inherit', 'inherit']
-            });
+            let spawn = cp.spawn(args.shift(), args, opts);
 
             callback(spawn);
 

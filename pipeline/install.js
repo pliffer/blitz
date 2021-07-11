@@ -1,7 +1,8 @@
-let request = require('request');
-let path    = require('path');
-let fs      = require('fs-extra');
-let cp      = require('child_process');
+const request = require('request');
+const path    = require('path');
+const fs      = require('fs-extra');
+const mysql   = require('mysql');
+const cp      = require('child_process');
 
 let Util = require('../util.js');
 
@@ -18,6 +19,10 @@ module.exports = {
     },
 
     run(opt){
+
+        // @todo Fazer referencia aos projetos que possuem outros como dependencia
+        // por exemplo, ao rodar o plifit client, ele usa o plifit cloud como dependencia
+        // portanto ambos devem ser instalados para que o plifit client possa funcionar
 
         let repos = {};
 
@@ -73,6 +78,8 @@ module.exports = {
                     data = data.toString();
 
                     let out = 'X->' + data;
+
+                    if(data.indexOf('The requested repository either does not exist or you do not have access') != -1) return reject(data);
 
                     let ma = data.match(/[0-9]+\%\s\([0-9]+\/[0-9]+\)/g);
 
@@ -137,6 +144,93 @@ module.exports = {
                 });
 
             });
+
+        }).then(() => {
+
+            return Util.randomCached('mysql-test');
+
+        }).then(testData => {
+
+            let port = Util.random(10000, 12000);
+
+            let MYSQL_HOST = testData.host;
+            let MYSQL_USER = testData.user;
+            let MYSQL_PASS = testData.password;
+            let MYSQL_DB   = testData.database;
+
+            let data = `APP_NAME=${opt}
+SUPPORT_MAIL=weslley@pliffer.com.br
+SECRET=test.787b3e76-4856-427c-a2f4-6165b4f88237
+PORT=${port}
+HOST=localhost
+PROTOCOL=http
+MYSQL_HOST=${MYSQL_HOST}
+MYSQL_USER=${MYSQL_USER}
+MYSQL_PASS=${MYSQL_PASS}
+MYSQL_DB=${MYSQL_DB}
+
+NODE_ENV=development
+
+ACCESS_HOST=https://lambda.pliffer.com.br
+LUNASTRO_HOST=https://logggger.com/api/lunastro
+`;
+
+            return fs.writeFile(path.join(process.cwd(), opt, '.env'), data, 'utf-8').then(() => {
+
+                return testData;
+
+            });
+
+        }).then(testData => {
+
+            return new Promise((resolve, reject) => {
+
+                let MYSQL_HOST = testData.host;
+                let MYSQL_USER = testData.user;
+                let MYSQL_PASS = testData.password;
+                let MYSQL_DB   = testData.database;
+
+                var client = mysql.createConnection({
+                    host     : MYSQL_HOST,
+                    user     : MYSQL_USER,
+                    password : MYSQL_PASS,
+                    database : MYSQL_DB
+                });
+
+                client.connect(err => {
+
+                    if(err) return reject(err);
+
+                    client.query("DROP DATABASE " + MYSQL_DB, [], (err, answer) => {
+
+                        if(err) return reject(err);
+
+                        client.query("CREATE DATABASE " + MYSQL_DB, [], (err, answer) => { 
+
+                            if(err) return reject(err);
+                            
+                            client.end();
+
+                            resolve();
+
+                        });
+
+                    });
+
+                });
+
+            });
+
+        }).then(() => {
+
+            return global.pipeline.start.run(opt);
+
+        }).then(() => {
+        }).then(() => {
+
+        }).catch(e => {
+
+            console.log(`@err ${e.toString().red}`);
 
         });
 
