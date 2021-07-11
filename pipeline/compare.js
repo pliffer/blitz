@@ -1,6 +1,7 @@
-let Util = require('../util.js');
+let path = require('path');
+let fs   = require('fs-extra');
 
-require('colors');
+let Util = require('../util.js');
 
 module.exports = {
 
@@ -15,7 +16,7 @@ module.exports = {
 
     compare(dirs){
 
-        Util.lineLog('Comparando pastas: ' + dirs.join(', '));
+        console.log('Comparando pastas: ' + dirs.join(', '));
 
         let files = {}
 
@@ -92,7 +93,43 @@ module.exports = {
 
     run(dirs, opts){
 
-        return module.exports.compare(dirs).then((res) => {
+        return module.exports.compare(dirs).then(async (res) => {
+
+            if(fs.existsSync(path.join(dirs[0], 'package.json')) && fs.existsSync(path.join(dirs[1], 'package.json'))){
+
+                let package1 = await fs.readJson(path.join(dirs[0], 'package.json'));
+                let package2 = await fs.readJson(path.join(dirs[1], 'package.json'));
+
+                console.log("\n\n");
+
+                for(prop in package1.dependencies){
+
+                    if(!package2.dependencies[prop]){
+
+                        console.log(`${dirs[1]} não tem a dependencia ${prop}`);
+                        continue;
+
+                    }
+
+                    if(package1.dependencies[prop] != package2.dependencies[prop]){
+
+                        console.log(`${prop.red} na versão ${package2.dependencies[prop]} em ${dirs[1]} e ${package1.dependencies[prop]} em ${dirs[0]}`);
+
+                    }
+
+                }
+
+                for(prop in package2.dependencies){
+
+                    if(!package1.dependencies[prop]){
+
+                        console.log(`${dirs[0]} não tem a dependencia ${prop}`);
+
+                    }
+
+                }
+
+            }
 
             console.log("");
 

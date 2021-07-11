@@ -4,6 +4,8 @@ const program = require('commander').program;
 const path    = require('path');
 const fs      = require('fs-extra');
 
+require('colors');
+
 program.version('0.0.1');
 
 let pipeline = {};

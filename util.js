@@ -161,6 +161,9 @@ let Util = {
 
                     err = true;
 
+                    if(typeof data1[i] == 'undefined') data1[i] = '';
+                    if(typeof data2[i] == 'undefined') data2[i] = '';
+
                     let maxLength = data1[i].length;
 
                     if(data2[i].length > maxLength) maxLength = data2[i].length;
