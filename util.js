@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const path   = require('path');
 const fs     = require('fs-extra');
 const cp     = require('child_process');
+const Prompt = require('prompt-password');
 
 let Util = {
 
@@ -293,6 +294,18 @@ let Util = {
             spawn.on('error', reject);
 
         });
+
+    },
+
+    askPass(msg){
+
+        return new Prompt({
+
+            type: 'password',
+            message: msg,
+            name: 'password'
+
+        }).run();
 
     },
 
