@@ -56,3 +56,9 @@ Object.keys(options).forEach(opt => {
     }
 
 });
+
+if(Object.keys(options).length == 0){
+
+    pipeline.start.run('.');
+
+}
