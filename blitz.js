@@ -40,11 +40,19 @@ program.parse(process.argv);
 
 const options = program.opts();
 
+let pipelineRun = false;
+
 Object.keys(options).forEach(opt => {
 
-    if(pipeline[opt]) pipeline[opt].run(options[opt], options);
-    else{
-        console.log(`@warn Option not registred ${opt}`);
+    if(pipeline[opt]){
+
+        pipeline[opt].run(options[opt], options);
+        pipelineRun = true;
+
+    } else{
+
+        if(!pipelineRun) console.log(`@warn Option not registred ${opt}`);
+
     }
 
 });
