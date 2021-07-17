@@ -22,28 +22,56 @@ module.exports = {
         let finalName = finalPath.replace(/\//g, '-');
 
         let packagePath = path.join(finalPath, 'package.json');
+        let blitzJsonPath = path.join(finalPath, 'blitz.json');
 
-        if(!fs.existsSync(packagePath)){
+        let existsPackage = fs.existsSync(packagePath);
+        let existsBlitz   = fs.existsSync(blitzJsonPath);
 
-            return console.log(`@warn ignored, because ${finalPath.red} is not a node project`);
+        if(!existsPackage && !existsBlitz){
+
+            return console.log(`@warn ignored, because ${finalPath.red} is not a parseable project`);
 
         }
 
-        let package = require(path.join(finalPath, 'package.json'));
+        if(existsBlitz){
 
-        Util.setCache('projects', finalName, {
-            finalPath: finalPath,
-            name: package.name,
-            package: package
-        }).then(() => {
+            let blitz = require(path.join(finalPath, 'blitz.json'));
 
-            console.log(`@info ${finalPath.green} sucessfully addedd to $BLITZ_HOME/cache/projects`);
+            Util.setCache('projects', finalName, {
+                finalPath: process.cwd(),
+                name: blitz.name,
+                blitz: blitz
+            }).then(() => {
 
-        }).catch(e => {
+                console.log(`@info ${finalPath.green} sucessfully addedd to $BLITZ_HOME/cache/projects`);
 
-            console.log(e);
+            }).catch(e => {
 
-        });
+                console.log(e);
+
+            });
+
+        }
+
+        if(existsPackage){
+
+            let package = require(path.join(finalPath, 'package.json'));
+
+            Util.setCache('projects', finalName, {
+                finalPath: finalPath,
+                name: package.name,
+                package: package
+            }).then(() => {
+
+                console.log(`@info ${finalPath.green} sucessfully addedd to $BLITZ_HOME/cache/projects`);
+
+            }).catch(e => {
+
+                console.log(e);
+
+            });
+
+        }
 
     }
 

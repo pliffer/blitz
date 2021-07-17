@@ -18,10 +18,70 @@ module.exports = {
 
     },
 
+    parseSftpConfigJson(jsonPath){
+
+        return Util.parseJson(jsonPath).then(async json => {
+
+            let dir = jsonPath.replace(path.basename(jsonPath), '');
+
+            let framework = await Util.identifyFramework(dir);
+
+            let blitz = {
+                password: '@todo Chave privada',
+                remote_path: json.remote_path,
+                dependencies: framework,
+                host: json.host,
+                name: json.host.replace(json.type + '.', '')
+            }
+
+            blitz.host = json.type + '://' + json.user + '@' + json.host;
+
+            return fs.writeJson(path.join(process.cwd(), 'blitz.json'), blitz).then(() => {
+
+                console.log('@info Criado arquivo blitz.json a partir de sftp-config.json');
+
+            });
+
+        });
+
+    },
+
+    parseBlitzJson(path){
+
+        Util.parseJson(path).then(json => {
+
+            console.log(json);
+            console.log("@todo Instalação da dependncia, adição da versão do wp")
+
+        });
+
+    },
+
     activeSpawn: null,
     running: false,
 
     run(folder){
+
+        let middle = '';
+
+        if(folder){
+
+            middle = folder;
+
+        }
+
+        let packagePath = path.join(process.cwd(), middle, 'package.json');
+
+        if(!fs.existsSync(packagePath)){
+
+            if(fs.existsSync(path.join(process.cwd(), middle, 'blitz.json'))) return module.exports.parseBlitzJson(path.join(process.cwd(), middle, 'blitz.json'));
+            if(fs.existsSync(path.join(process.cwd(), middle, 'sftp-config.json'))) return module.exports.parseSftpConfigJson(path.join(process.cwd(), middle, 'sftp-config.json'));
+
+            return console.log("@err There's no package.json on this folder");
+
+        }
+
+        // @todo Identificar se package.json é válido
 
         // @todo Melhorar, pois acho que não é a melhor maneira
         if(!module.exports.activeSpawn){
@@ -54,22 +114,6 @@ module.exports = {
                 }
 
             });
-
-        }
-
-        let middle = '';
-
-        if(folder){
-
-            middle = folder;
-
-        }
-
-        let packagePath = path.join(process.cwd(), middle, 'package.json');
-
-        if(!fs.existsSync(packagePath)){
-
-            return console.log("@err There's no package.json on this folder");
 
         }
 

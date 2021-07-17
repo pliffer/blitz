@@ -20,6 +20,75 @@ let Util = {
 
 	},
 
+    identifyFramework(dir){
+
+        // @todo Adicionar uma metodologia mais prática na identificação dos frameworks
+        // como por exemplo uma adição por JSON
+
+        // Pega-se os arquivos irmãos, a fim de identificar qual framework estamos
+        let brotherFiles = fs.readdirSync(dir);
+
+        let possibility = {};
+
+        let possibleFiles = {
+            wordpressTheme: ['entry.php', 'header.php', 'functions.php', 'sidebar.php', 'comments.php'],
+            magento: ['Gruntfile.js.sample', 'auth.json.sample', 'phpserver', 'SECURITY.md', 'generated', 'COPYING.txt'],
+            magentoTheme: ['theme.xml', 'registration.php', 'i18n'],
+            prestashop: ['header.php', 'init.php', 'error500.html', 'prestashop', 'Adapter', 'classes', 'localization', 'images.inc.php'],
+            prestashopTheme: ['404.tpl', 'breadcrumb.tpl', 'my-account.tpl', 'config.xml', 'cms.tpl']
+        }
+
+        brotherFiles.forEach(file => {
+
+            for(framework in possibleFiles){
+
+                if(possibleFiles[framework].includes(file)){
+
+                    if(!possibility[framework]) possibility[framework] = 0;
+
+                    possibility[framework]++;
+
+                }
+
+            }
+
+        });
+
+        let max    = 0;
+        let chosed = '';
+
+        Object.keys(possibility).forEach(framework => {
+
+            if(possibility[framework] > max){
+
+                chosed = framework;
+                max = possibility[framework];
+
+            }
+
+        });
+
+        return chosed;
+
+    },
+
+    parseJson(path){
+
+        return fs.readFile(path, 'utf-8').then(json => {
+
+            // Remove os comentários
+            json = json.replace(/\s\/\/.+?\n/g, '');
+
+            return JSON.parse(json);
+
+        }).catch(e => {
+
+            console.log(`@err ${path} is in an invalid json format`);
+
+        });
+
+    },
+
     random(min, max){
         return Math.floor(Math.random()*(max-min+1)+min);
     },
@@ -241,6 +310,8 @@ let Util = {
 
         return fs.ensureDir(cacheDir).then(() => {
 
+            filename = filename.replace('.json', '');
+
             let filepath = path.join(cacheDir, filename + '.json');
 
             return fs.writeJson(filepath, object);
@@ -340,11 +411,11 @@ let Util = {
 
     },
 
-    spawn(args, dataCallback = () => {}){
+    spawn(args, dataCallback = () => {}, opts = {}){
 
         return new Promise((resolve, reject) => {
 
-            let spawn = cp.spawn(args.shift(), args);
+            let spawn = cp.spawn(args.shift(), args, opts);
 
             spawn.stdout.on('data', (data) => {
 

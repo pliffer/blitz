@@ -6,6 +6,8 @@ const fs      = require('fs-extra');
 
 require('colors');
 
+let Util = require('./util');
+
 program.version('0.0.1');
 
 let pipeline = {};
@@ -61,6 +63,31 @@ Object.keys(options).forEach(opt => {
 
 if(Object.keys(options).length == 0){
 
-    pipeline.start.run('.');
+    let argv = process.argv;
+
+    argv.shift();
+    argv.shift();
+
+    if(argv.length){
+
+        let command = ['blitz'];
+
+        argv.forEach((arg, k) => {
+
+            let prefix = '';
+
+            if(k == 0) prefix = '--';
+
+            command.push(prefix + arg);
+
+        });
+
+        Util.inheritSpawn(command);
+
+    } else{
+
+        pipeline.start.run('.');
+
+    }
 
 }
