@@ -350,6 +350,16 @@ let Util = {
 
     },
 
+    run(string, dataCallback, opts){
+
+        return new Promise((resolve, reject) => {
+
+            return module.exports.spawn(string.split(' '), dataCallback, opts).then(resolve).catch(reject);
+
+        });
+
+    },
+
     getEnv(){
 
         let envPath = path.join(process.cwd(), '.env');

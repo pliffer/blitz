@@ -40,6 +40,12 @@ module.exports = {
                     have += "[git] "[proj.repo?"green":"red"];
 
                     if(!proj.repo) noRepo.push(proj);
+                    else{
+
+                        // Util.spawn(['git', 'status'], data => {
+                        // });
+
+                    }
 
                     console.log(have + proj.name.green, '->', proj.finalPath);
 
@@ -81,8 +87,6 @@ module.exports = {
             proj.repo = data;
 
             Util.setCache('projects', proj.url, proj);
-
-            // console.log(data, proj.name.green);
 
         }, {
             cwd: proj.finalPath

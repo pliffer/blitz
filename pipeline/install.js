@@ -18,7 +18,15 @@ module.exports = {
 
     },
 
-    run(opt){
+    run(opt, opts){
+
+        let finalName = false;
+        let appName   = false;
+        let run       = true;
+
+        if(typeof opts.finalName != 'undefined') finalName = opts.finalName;
+        if(typeof opts.appName   != 'undefined') appName   = opts.appName;
+        if(typeof opts.run       != 'undefined') run       = opts.run;
 
         // @todo Fazer referencia aos projetos que possuem outros como dependencia
         // por exemplo, ao rodar o plifit client, ele usa o plifit cloud como dependencia
@@ -26,7 +34,7 @@ module.exports = {
 
         let repos = {};
 
-        Util.listCached('repolist').then(repolist => {
+        return Util.listCached('repolist').then(repolist => {
 
             let repolistPromise = [];
 
@@ -62,7 +70,9 @@ module.exports = {
 
                 if(!repos[opt]) return console.log(`@err ${opt} not found for installation`);
 
-                let git = cp.spawn('git', ['clone', '--progress', repos[opt]]);
+                if(!finalName) finalName = opt;
+
+                let git = cp.spawn('git', ['clone', '--progress', repos[opt], finalName]);
 
                 git.stdout.on('data', function (data) {
 
@@ -117,17 +127,19 @@ module.exports = {
 
                 if(!repos[opt]) return console.log(`@err ${opt} not found for installation`);
 
-                let git = cp.spawn('npm', ['install'], {
-                    cwd: path.join(process.cwd(), opt)
+                let spawn = cp.spawn('npm', ['install'], {
+                    cwd: path.join(process.cwd(), finalName)
                 });
 
-                git.stdout.on('data', function (data) {
+                if(opts.onSpawn) opts.onSpawn(spawn);
+
+                spawn.stdout.on('data', function (data) {
 
                     console.log('stdout: ' + data.toString());
 
                 });
 
-                git.stderr.on('data', function (data) {
+                spawn.stderr.on('data', function (data) {
 
                     data = data.toString();
 
@@ -137,7 +149,7 @@ module.exports = {
 
                 });
 
-                git.on('exit', function (code) {
+                spawn.on('exit', function (code) {
 
                     resolve();
 
@@ -151,6 +163,8 @@ module.exports = {
 
         }).then(testData => {
 
+            // @test With non mysql projects
+
             let port = Util.random(10000, 12000);
 
             let MYSQL_HOST = testData.host;
@@ -158,7 +172,9 @@ module.exports = {
             let MYSQL_PASS = testData.password;
             let MYSQL_DB   = testData.database;
 
-            let data = `APP_NAME=${opt}
+            if(!appName) appName = finalName;
+
+            let data = `APP_NAME=${appName}
 SUPPORT_MAIL=weslley@pliffer.com.br
 SECRET=test.787b3e76-4856-427c-a2f4-6165b4f88237
 PORT=${port}
@@ -175,7 +191,7 @@ ACCESS_HOST=https://lambda.pliffer.com.br
 LUNASTRO_HOST=https://logggger.com/api/lunastro
 `;
 
-            return fs.writeFile(path.join(process.cwd(), opt, '.env'), data, 'utf-8').then(() => {
+            return fs.writeFile(path.join(process.cwd(), finalName, '.env'), data, 'utf-8').then(() => {
 
                 return testData;
 
@@ -223,9 +239,10 @@ LUNASTRO_HOST=https://logggger.com/api/lunastro
 
         }).then(() => {
 
-            return global.pipeline.start.run(opt);
+            if(run) return global.pipeline.start.run(opt);
 
         }).then(() => {
+
         }).then(() => {
 
         }).catch(e => {
