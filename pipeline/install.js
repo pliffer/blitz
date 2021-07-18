@@ -23,6 +23,7 @@ module.exports = {
         let finalName = false;
         let appName   = false;
         let run       = true;
+        let env       = true;
 
         if(typeof opts.finalName != 'undefined') finalName = opts.finalName;
         if(typeof opts.appName   != 'undefined') appName   = opts.appName;
@@ -127,6 +128,14 @@ module.exports = {
 
                 if(!repos[opt]) return console.log(`@err ${opt} not found for installation`);
 
+                if(fs.existsSync(path.join(process.cwd(), finalName, 'blitz.json'))){
+
+                    run = false;
+                    env = false;
+                    return resolve();
+
+                }
+
                 let spawn = cp.spawn('npm', ['install'], {
                     cwd: path.join(process.cwd(), finalName)
                 });
@@ -190,14 +199,19 @@ NODE_ENV=development
 ACCESS_HOST=https://lambda.pliffer.com.br
 LUNASTRO_HOST=https://logggger.com/api/lunastro
 `;
+            if(env){
 
-            return fs.writeFile(path.join(process.cwd(), finalName, '.env'), data, 'utf-8').then(() => {
+                return fs.writeFile(path.join(process.cwd(), finalName, '.env'), data, 'utf-8').then(() => {
 
-                return testData;
+                    return testData;
 
-            });
+                });
+
+            }
 
         }).then(testData => {
+
+            if(!env) return;
 
             return new Promise((resolve, reject) => {
 

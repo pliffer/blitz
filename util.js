@@ -261,7 +261,9 @@ let Util = {
                     result.push({
                         line: i,
                         part1: part1Err,
-                        part2: part2Err
+                        part2: part2Err,
+                        data1: data1,
+                        data2: data2
                     });
 
                 }
@@ -271,6 +273,66 @@ let Util = {
             return resolve(result);
 
         });
+
+    },
+
+    showDiff(diff, columns){
+
+        let subjects = [];
+
+        let maxLength = 0;
+
+        let maxAllowed = Math.floor(columns/2) - 10;
+
+        for(var i = 0; i < 8; i++){
+
+            let left  = diff.data1[i + diff.line];
+            let right = diff.data2[i + diff.line];
+
+            if(!left) left = '';
+            if(!right) right = '';
+
+            if(left.length  > maxLength) maxLength = left.length;
+            if(right.length > maxLength) maxLength = right.length;
+
+            if(maxLength > maxAllowed){
+
+                maxLength = maxAllowed;
+
+                left  = left.substr(0,  maxLength);
+                right = right.substr(0, maxLength);
+
+            }
+
+            subjects.push([left, right]);
+
+        }
+
+        subjects.forEach((subject, k) => {
+
+            let fill = " ".repeat(maxLength - subject[0].length);
+            let line = (diff.line + k).toString();
+
+            console.log(line.yellow + ' ' + Util.sintaxHighlight(subject[0], 'js') + " " + fill + " | " + line.yellow + " " + Util.sintaxHighlight(subject[1], 'js'));
+
+        });
+
+        console.log("");
+
+    },
+
+    sintaxHighlight(txt, lang = 'js'){
+
+        let parsed = txt;
+
+        parsed = parsed.replace('let', 'let'.italic.blue);
+        parsed = parsed.replace('const', 'const'.italic.blue);
+        parsed = parsed.replace('var', 'var'.italic.blue);
+
+        parsed = parsed.replace(/\"(.+?)\"/g, '"' + "$1".yellow.italic + '"')
+        parsed = parsed.replace(/\'(.+?)\'/g, '\'' + "$1".yellow.italic + '\'')
+
+        return parsed;
 
     },
     

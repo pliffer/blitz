@@ -5,7 +5,11 @@ let Util = require('../util.js');
 
 module.exports = {
 
+    columns: 80,
+
     setup(program){
+
+        if(process.stdout.columns) module.exports.columns = process.stdout.columns;
 
         program.option('-co, --compare [paths...]', 'Compare two dirs');
         program.option('--kugel', 'Is kugel enabled');
@@ -133,6 +137,8 @@ module.exports = {
 
             console.log("");
 
+            let iteration = 0;
+
             res.diff.forEach(diff => {
 
                 if(opts.kugel){
@@ -148,7 +154,9 @@ module.exports = {
 
                 }
 
-                console.log('Linha: ' + diff[0].line.toString().yellow, diff.filename.magenta);
+                console.log('Arquivo ' + (++iteration) + ' ' + diff.filename.magenta + ':' + diff[0].line.toString().yellow);
+
+                Util.showDiff(diff[0], module.exports.columns);
 
             });
 
