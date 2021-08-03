@@ -3,6 +3,7 @@ const path   = require('path');
 const fs     = require('fs-extra');
 const cp     = require('child_process');
 const Prompt = require('prompt-password');
+const opn    = require('opn');
 
 let Util = {
 
@@ -19,6 +20,12 @@ let Util = {
 		other: ['conf', 'css', 'example', 'EXAMPLE', 'txt']
 
 	},
+
+    open(url){
+
+        opn(url);
+
+    },
 
     identifyFramework(dir){
 

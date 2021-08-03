@@ -47,6 +47,8 @@ module.exports = {
 
                     }
 
+                    if(!proj.name) proj.name = '(sem nome)';
+
                     console.log(have + proj.name.green, '->', proj.finalPath);
 
                 }));

@@ -46,12 +46,26 @@ module.exports = {
 
     },
 
-    parseBlitzJson(path){
+    parseBlitzJson(blitzPath){
 
-        Util.parseJson(path).then(json => {
+        Util.parseJson(blitzPath).then(json => {
 
             console.log(json);
             console.log("@todo Instalação da dependncia, adição da versão do wp")
+
+        });
+
+    },
+
+    parseInstallEnvironment(installPath){
+
+        fs.readJson(installPath).then(json => {
+            
+            let cliInstallFile = path.join(installPath, '../../install/index_cli.php');
+
+            let commands = ['php', cliInstallFile, '--step', 'all', '--language', json.language, '--timezone', json.timezone, '--domain', json.domain, '--db_server', json.db_server, '--db_user', json.db_user, '--db_password', json.db_password, '--db_name', json.db_name, '--name', json.name, '--country', json.country, '--firstname', json.firstname, '--lastname', json.lastname, '--password', json.password, '--email', json.email, '--ssl', json.ssl];
+
+            return Util.inheritSpawn(commands);
 
         });
 
@@ -77,6 +91,9 @@ module.exports = {
             if(fs.existsSync(path.join(process.cwd(), middle, 'blitz.json'))) return module.exports.parseBlitzJson(path.join(process.cwd(), middle, 'blitz.json'));
             if(fs.existsSync(path.join(process.cwd(), middle, 'sftp-config.json'))) return module.exports.parseSftpConfigJson(path.join(process.cwd(), middle, 'sftp-config.json'));
 
+            if(fs.existsSync(path.join(process.cwd(), middle, 'blitz.install.environment.json'))) return module.exports.parseInstallEnvironment(path.join(process.cwd(), middle, 'blitz.install.environment.json'));
+            if(fs.existsSync(path.join(process.cwd(), middle, 'blitz', 'blitz.install.environment.json'))) return module.exports.parseInstallEnvironment(path.join(process.cwd(), middle, 'blitz', 'blitz.install.environment.json'));
+
             return console.log("@err There's no package.json on this folder");
 
         }
@@ -87,6 +104,12 @@ module.exports = {
         if(!module.exports.activeSpawn){
 
             process.stdin.setEncoding('utf8');
+
+            process.stdin.on('keypress', (key, data) => {
+
+                console.log('KEYPRESS', key, data);
+
+            });
 
             process.stdin.on('data', (data) => {
 
@@ -117,12 +140,15 @@ module.exports = {
 
         }
 
+        process.env._ = path.join(__dirname, '../');
+
         return fs.readJson(packagePath).then(project => {
 
             Util.inheritSpawn(['node', project.main], {
 
                 cwd: path.join(process.cwd(), middle),
                 stdio: ['pipe', 'pipe', 'pipe'],
+                env: process.env,
                 // detached: true,
 
                 callback: spawn => {

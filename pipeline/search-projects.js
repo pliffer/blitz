@@ -17,6 +17,8 @@ module.exports = {
 
     run(searchTerm){
 
+        // @todo Buscar na pasta do sublime /home/pliffer/.config/sublime-text-3/Packages/User/Projects
+
         return Util.forEachEntry(process.cwd(), (entry) => {
 
             let basename = path.basename(entry);

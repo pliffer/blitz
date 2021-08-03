@@ -220,6 +220,7 @@ LUNASTRO_HOST=https://logggger.com/api/lunastro
                 let MYSQL_PASS = testData.password;
                 let MYSQL_DB   = testData.database;
 
+                // @dry 01M0N00dm3
                 var client = mysql.createConnection({
                     host     : MYSQL_HOST,
                     user     : MYSQL_USER,
