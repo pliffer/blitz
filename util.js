@@ -283,7 +283,7 @@ let Util = {
 
     },
 
-    showDiff(diff, columns){
+    showDiff(files, diff, columns){
 
         let subjects = [];
 
@@ -291,7 +291,34 @@ let Util = {
 
         let maxAllowed = Math.floor(columns/2) - 10;
 
-        for(var i = 0; i < 8; i++){
+        let begin = -4;
+        let end   = Math.abs(begin) + 1;
+
+        if(i+diff.line < 0) begin = 0;
+
+        let modLine = diff.line;
+
+        let equalLineNumber = -1;
+        let equalLine = "";
+
+        let maxLineLength = diff.data1.length;
+
+        if(diff.data2.length > maxLineLength) maxLineLength = diff.data2.length;
+
+        maxLineLength = maxLineLength.toString().length;
+
+        diff.data2.forEach((line, lineNumber) => {
+
+            if(lineNumber < modLine) return;
+
+            if(line == diff.data1[modLine]){
+                equalLine = line;
+                equalLineNumber = lineNumber;
+            }
+
+        });
+
+        for(var i = begin; i < end; i++){
 
             let left  = diff.data1[i + diff.line];
             let right = diff.data2[i + diff.line];
@@ -315,12 +342,106 @@ let Util = {
 
         }
 
+        // Mostra o nome dos arquivos acima das linhas
+        console.log(files.file1.cyan + " ".repeat(maxLength - files.file1.length) + "      | " + files.file2.cyan);
+
         subjects.forEach((subject, k) => {
 
-            let fill = " ".repeat(maxLength - subject[0].length);
-            let line = (diff.line + k).toString();
+            let bias = 0;
+            let subjectLeft = subject[0];
+            let stepLine = false;
 
-            console.log(line.yellow + ' ' + Util.sintaxHighlight(subject[0], 'js') + " " + fill + " | " + line.yellow + " " + Util.sintaxHighlight(subject[1], 'js'));
+            if(equalLineNumber > -1){
+
+                bias = equalLineNumber - modLine;
+
+            }
+
+            if(k >= Math.abs(begin) && bias > 0){
+
+                stepLine = k - Math.abs(begin);
+
+                if(k - Math.abs(begin) < bias){
+
+                    subjectLeft = '';
+
+                } else{
+
+                    subjectLeft = subjects[k-bias][0];
+
+                }
+
+            }
+
+            let fill = " ".repeat(maxLength - subjectLeft.length);
+            let line = (diff.line + k + begin + 1);
+
+            let lineLeft = line;
+            let lineRight = line;
+
+            if(stepLine !== false){
+
+                if(stepLine > bias - 1){
+
+                    lineLeft = line - bias;
+
+                } else{
+
+                    lineLeft = ' -';
+
+                }
+
+                if(modLine + end < bias && stepLine > 1){
+
+                    lineLeft = (bias + k + begin + 1);
+
+                    subjectLeft = diff.data1[line+1];
+
+                    let repeatBy = maxLength - subjectLeft.length;
+
+                    if(repeatBy < 0) repeatBy = 0;
+ 
+                    fill = " ".repeat(repeatBy);
+
+
+                }
+
+
+            }
+
+            if(lineLeft.toString().length < maxLineLength){
+
+                lineLeft = " ".repeat(maxLineLength - lineLeft.toString().length) + lineLeft.toString();
+
+            }
+
+            if(lineRight.toString().length < maxLineLength){
+
+                lineRight = " ".repeat(maxLineLength - lineRight.toString().length) + lineRight.toString();
+
+            }
+
+            if(lineRight == modLine + 1){
+
+                lineRight = lineRight.toString().blue;
+
+            } else{
+
+                lineRight = lineRight.toString().yellow;
+
+            }
+
+            if(lineLeft == modLine + 1){
+
+                lineLeft = lineLeft.toString().blue;
+
+            } else{
+
+                lineLeft = lineLeft.toString().yellow;
+
+            }
+
+            console.log(lineLeft + ' ' + Util.sintaxHighlight(subjectLeft, 'js') + " " + fill + " | " + lineRight + " " + Util.sintaxHighlight(subject[1], 'js'));
 
         });
 

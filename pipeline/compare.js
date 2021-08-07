@@ -154,9 +154,12 @@ module.exports = {
 
                 }
 
-                console.log('Arquivo ' + (++iteration) + ' ' + diff.filename.magenta + ':' + diff[0].line.toString().yellow);
+                console.log('Arquivo ' + (++iteration) + ' ' + diff.filename.magenta + ':' + (diff[0].line+1).toString().yellow);
 
-                Util.showDiff(diff[0], module.exports.columns);
+                Util.showDiff({
+                    file1: dirs[0] + diff.filename,
+                    file2: dirs[1] + diff.filename
+                }, diff[0], module.exports.columns);
 
             });
 

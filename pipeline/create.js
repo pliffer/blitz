@@ -23,6 +23,9 @@ module.exports = {
 
             case 'prestashop1.7':
 
+                // @todo Criar as instalações dentro de install/ pois assim será apagado durante o término
+                // da instalação, garantindo segurança(pois os arquivos gerados podem ser sensíveis)
+
                 return Util.inheritSpawn(['wget', 'https://download.prestashop.com/download/releases/prestashop_1.7.7.5.zip', '-nc']).then(() => {
 
                     return Util.inheritSpawn(['unzip', 'prestashop_1.7.7.5.zip', '-d', 'prestashop_1.7.7.5']);
@@ -58,8 +61,12 @@ module.exports = {
 
 3. Rode o comando 'blitz' dentro da pasta ${projName} ou ${projName}/blitz
 
-4. (Opcional) Gere o virtual host usando 'blitz generate vh'
-4. (Opcional) 'sudo certbot certonly -d <dominio>' # para gerar o certificado HTTPS
+4. Dê permissões as pastas:
+sudo chown -R <user>:www-data <path> 
+sudo chmod g+w -R <path> 
+
+X. (Opcional) Gere o virtual host usando 'blitz generate vh'
+X. (Opcional) 'sudo certbot certonly -d <dominio>' # para gerar o certificado HTTPS
 
 `;
 
@@ -71,7 +78,7 @@ module.exports = {
 
                     let installEnvironmentJson = {
                         language: "pt",
-                        timezone: "America/Sao_Paulo",
+                        timezone: "America/Noronha",
                         domain: "<dominio>",
                         db_server: "<mysql_host>",
                         db_user: "<mysql_user>",
