@@ -174,6 +174,16 @@ module.exports = {
 
                     });
 
+                    spawn.on('close', (errorCode) => {
+
+                        module.exports.running = false;
+
+                        console.log(`\n`)
+                        console.log(`@info Process exited (code ${errorCode.toString().white}${") -----------------".blue}`.blue)
+                        console.log(`@info \`rs\` for blitz restart`.blue)
+
+                    });
+
                 }
             });
 
