@@ -177,9 +177,11 @@ module.exports = {
                     spawn.on('close', (errorCode) => {
 
                         module.exports.running = false;
+                        
+                        if(errorCode) errorCode.toString().white;
 
                         console.log(`\n`)
-                        console.log(`@info Process exited (code ${errorCode.toString().white}${") -----------------".blue}`.blue)
+                        console.log(`@info Process exited (code ${errorCode}${") -----------------".blue}`.blue)
                         console.log(`@info \`rs\` for blitz restart`.blue)
 
                     });

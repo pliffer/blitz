@@ -16,10 +16,12 @@ module.exports = {
 
         let searchRegExp = new RegExp(searchTerm, "g");
         let filesFound = [];
+        let logFiles = [];
 
         return Util.forEachEntry(process.cwd(), (entry, content) => {
 
             if(!searchRegExp.test(content)) return;
+            if(entry.indexOf('.log') != -1) return logFiles.push(entry);
 
             let contentLines = content.split("\n");
 
@@ -38,9 +40,14 @@ module.exports = {
             });
 
             console.log("");
+            
+        }).then(() => {
+
+            if(logFiles.length){
+                console.log("@info Houveram " + logFiles.length + " arquivos de logs");
+            }
 
         });
-
 
     }
 
