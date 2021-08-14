@@ -84,7 +84,7 @@ let Util = {
         return fs.readFile(path, 'utf-8').then(json => {
 
             // Remove os comentários
-            json = json.replace(/\s\/\/.+?\n/g, '');
+            json = json.toString().replace(/\s\/\/.+?\n/g, '');
 
             return JSON.parse(json);
 
@@ -504,7 +504,7 @@ let Util = {
 
         return fs.ensureDir(cacheDir).then(() => {
 
-            filename = filename.replace('.json', '');
+            filename = filename.toString().replace('.json', '');
 
             let filepath = path.join(cacheDir, filename + '.json');
 
