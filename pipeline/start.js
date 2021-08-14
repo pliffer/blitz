@@ -178,6 +178,8 @@ module.exports = {
 
                         module.exports.running = false;
 
+                        if(!errorCode) errorCode = "null";
+
                         console.log(`\n`)
                         console.log(`@info Process exited (code ${errorCode.toString().white}${") -----------------".blue}`.blue)
                         console.log(`@info \`rs\` for blitz restart`.blue)

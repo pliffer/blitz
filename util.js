@@ -342,8 +342,12 @@ let Util = {
 
         }
 
+        let fileBlankRepeat = maxLength - files.file1.length;
+
+        if(fileBlankRepeat < 0) fileBlankRepeat = 0;
+
         // Mostra o nome dos arquivos acima das linhas
-        console.log(files.file1.cyan + " ".repeat(maxLength - files.file1.length) + "      | " + files.file2.cyan);
+        console.log(files.file1.cyan + " ".repeat(fileBlankRepeat) + "      | " + files.file2.cyan);
 
         subjects.forEach((subject, k) => {
 
@@ -516,6 +520,38 @@ let Util = {
 
     },
 
+    getProjectFolders(name){
+
+        let total = [];
+
+        return Util.listCached('projects').then(projects => {
+
+            let projectsPromise = [];
+            
+            projects.forEach(project => {
+
+                projectsPromise.push(Util.getCache('projects', project).then(proj => {
+
+                    if(name == proj.name){
+
+                        total.push(proj);
+
+                    }
+
+                }));
+
+            });
+
+            return Promise.all(projectsPromise);
+
+        }).then(() => {
+
+            return total;
+
+        });
+
+    },
+
     getCache(folder, file){
 
         let sufix = '.json';
@@ -529,6 +565,30 @@ let Util = {
             if(!exists) return Promise.reject(file + ' not cached at ' + folder);
 
             return fs.readJson(filepath);
+
+        }).catch(e => {
+
+            console.log(`@err ${e.toString()}`);
+
+            throw e;
+
+        });
+
+    },
+
+    removeCache(folder, file){
+
+        let sufix = '.json';
+
+        if(file.substr(-5) == '.json') sufix = '';
+
+        let filepath = path.join(__dirname, 'cache', folder, file + sufix);
+
+        return fs.exists(filepath).then(exists => {
+
+            if(!exists) return Promise.reject(file + ' not cached at ' + folder);
+
+            return fs.remove(filepath);
 
         }).catch(e => {
 

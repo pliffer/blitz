@@ -46,9 +46,13 @@ module.exports = {
 
                         let separator = '/';
 
-                        if(process.env.LUCY_HOST[process.env.LUCY_HOST.length-1] == '/') separator = '';                        
+                        if(process.env.LUCY_HOST[process.env.LUCY_HOST.length-1] == '/') separator = '';
 
-                        Util.open(process.env.LUCY_HOST + separator + proj.finalPath);
+                        let urlToOpen = process.env.LUCY_HOST + separator + proj.finalPath;
+
+                        urlToOpen = urlToOpen.replace(process.env.LUCY_HOST + '//', process.env.LUCY_HOST + '/');
+
+                        Util.open(urlToOpen);
 
                     }
 

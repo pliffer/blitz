@@ -17,7 +17,7 @@ module.exports = {
 
     run(opt){
 
-        let finalPath = path.join(process.cwd(), opt);
+        let finalPath = path.resolve(process.cwd(), opt);
 
         let finalName = finalPath.replace(/\//g, '-');
 
