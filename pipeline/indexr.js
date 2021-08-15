@@ -204,8 +204,6 @@ module.exports = {
 
     tree(dir, obj){
 
-        console.log(dir);
-
         if(typeof obj === 'undefined'){
 
             obj = {
