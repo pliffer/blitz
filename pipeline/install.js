@@ -39,25 +39,11 @@ module.exports = {
 
             let repolistPromise = [];
 
-            repolist.forEach(list => {
+            repolist.forEach(repo => {
 
-                repolistPromise.push(Util.getCache('repolist', list).then(content => {
+                repolistPromise.push(Util.getCache('repolist', repo).then(content => {
 
-                    return new Promise((resolve, reject) => {
-
-                        request(content.url, (err, content, body) => {
-
-                            body.split('\n').forEach(line => {
-
-                                repos[line.split(': ')[0]] = line.split(': ')[1];
-
-                            });
-
-                            resolve();
-
-                        });
-
-                    });
+                    repos[repo.replace('.json', '')] = content;
 
                 }));
 

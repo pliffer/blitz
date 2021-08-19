@@ -13,13 +13,16 @@
   "license": "SEE LICENSE IN LICENSE.md",
   "homepage": "https://bitbucket.org/pliffer/blitz#readme",
   "dependencies": {
+    "astr-api": "github:pliffer/astr-api",
     "colors": "^1.4.0",
     "commander": "^7.2.0",
     "dotenv": "^10.0.0",
     "fs-extra": "^10.0.0",
+    "inquirer": "^8.1.2",
     "mysql": "^2.18.1",
     "opn": "^6.0.0",
     "prompt-password": "^1.2.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "virtualenv": "github:pliffer/virtualenv"
   }
 }

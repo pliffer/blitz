@@ -1,9 +1,9 @@
-const dotenv = require('dotenv');
-const path   = require('path');
-const fs     = require('fs-extra');
-const cp     = require('child_process');
-const Prompt = require('prompt-password');
-const opn    = require('opn');
+const Prompt   = require('prompt-password');
+const dotenv   = require('dotenv');
+const path     = require('path');
+const opn      = require('opn');
+const cp       = require('child_process');
+const fs       = require('fs-extra');
 
 let Util = {
 
@@ -621,6 +621,8 @@ let Util = {
 
     getProjectFolders(name){
 
+        if(typeof name == 'undefined') return Promise.reject(`@err Argument name needed`);
+
         let total = [];
 
         return Util.listCached('projects').then(projects => {
@@ -653,6 +655,9 @@ let Util = {
 
     getCache(folder, file){
 
+        if(typeof folder == 'undefined') return Promise.reject(`@err Argument folder needed`);
+        if(typeof file   == 'undefined') return Promise.reject(`@err Argument file needed`);
+
         let sufix = '.json';
 
         if(file.substr(-5) == '.json') sufix = '';
@@ -676,6 +681,9 @@ let Util = {
     },
 
     removeCache(folder, file){
+
+        if(typeof folder == 'undefined') return Promise.reject(`@err Argument folder needed`);
+        if(typeof file   == 'undefined') return Promise.reject(`@err Argument file needed`);
 
         let sufix = '.json';
 
@@ -715,7 +723,7 @@ let Util = {
 
         if(!fs.existsSync(envPath)){
 
-            console.log(`@err There's no .env on this folder to be parsed`)
+            console.log(`@err There's no .env on this folder to be parsed`);
 
             return false;
 
