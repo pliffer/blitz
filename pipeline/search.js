@@ -33,7 +33,38 @@ module.exports = {
 
                 if(!searchRegExp.test(lineContent)) return;
 
-                lineContent = lineContent.replace(searchTerm, searchTerm.red)
+                // @todo Fazer esses numeros variarem, de acordo com o tamanho disponível na tela
+                let beginAt = 30;
+                let maxLineContent = 300;
+                let howManyChars = 60;
+
+                if(lineContent.length > maxLineContent){
+
+                    let foundAt = lineContent.indexOf(searchTerm);
+
+                    if(foundAt < beginAt){
+
+                        lineContent = lineContent.substr(0, maxLineContent);
+
+                    } else{
+
+                        let beggining = lineContent.substr(0, beginAt);
+                        let end       = "[...]".blue;
+                        let middle    = end;
+
+                        middle+= lineContent.substr(foundAt - ((howManyChars / 2) - searchTerm.length/2), howManyChars);
+
+                        middle = middle.replace(searchTerm, searchTerm.red);
+
+                        lineContent = beggining + middle + end;
+
+                    }
+
+                } else{
+
+                    lineContent = lineContent.replace(searchTerm, searchTerm.red)
+
+                }
 
                 console.log(`${lineK.toString().magenta} ${lineContent}`);
 
