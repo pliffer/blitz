@@ -144,6 +144,18 @@ let Util = {
             prestashopTheme: ['404.tpl', 'breadcrumb.tpl', 'my-account.tpl', 'config.xml', 'cms.tpl']
         }
 
+        if(brotherFiles.includes('blitz.json')){
+
+            let blitzData = fs.readJsonSync(path.join(dir, 'blitz.json'));
+
+            if(blitzData.framework){
+
+                return blitzData.framework;
+
+            }
+
+        }
+
         brotherFiles.forEach(file => {
 
             for(framework in possibleFiles){

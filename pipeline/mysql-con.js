@@ -20,15 +20,76 @@ module.exports = {
         let framework = Util.identifyFramework(cwd);
 
         let env = {};
+        let baseFile, configFile, configData;
+        let opts = [];
 
         switch(framework){
+            case 'magento':
+
+            baseFile = 'app/etc/env.php';
+
+            configFile = path.join(cwd, baseFile);
+
+            configData = fs.readFileSync(configFile, 'utf-8');
+
+            configData.split("\n").forEach(line => {
+
+                let lineMatches = line.match(/(\'|")([a-zA-Z_]+)(\'|")\s+=>\s+(\'|")(.+?)(\',|",|'|")/);
+
+                if(lineMatches){
+                    opts[lineMatches[2]] = lineMatches[5];
+                }
+
+            });
+
+            if(opts.host){
+
+                env.MYSQL_HOST = opts.host;
+
+            } else{
+
+                return console.log(`@err Não há MYSQL_HOST encontrado`);
+
+            }
+
+            if(opts.username){
+
+                env.MYSQL_USER = opts.username;
+
+            } else{
+
+                return console.log(`@err Não há MYSQL_USER encontrado`);
+
+            }
+
+            if(opts.password){
+
+                env.MYSQL_PASS = opts.password;
+
+            } else{
+
+                return console.log(`@err Não há MYSQL_PASS encontrado`);
+
+            }
+
+            if(opts.dbname){
+
+                env.MYSQL_DB = opts.dbname;
+
+            } else{
+
+                return console.log(`@err Não há MYSQL_DB encontrado`);
+
+            }
+
+            break;
             case 'prestashop':
 
                 // @todo Verificar versão do prestashop
 
                 let version = 1.74;
 
-                let baseFile = 'config/settings.inc.php';
+                baseFile = 'config/settings.inc.php';
 
                 if(version >= 1.7){
 
@@ -36,11 +97,9 @@ module.exports = {
 
                 }
 
-                let configFile = path.join(cwd, baseFile);
+                configFile = path.join(cwd, baseFile);
 
-                let configData = fs.readFileSync(configFile, 'utf-8');
-
-                let opts = [];
+                configData = fs.readFileSync(configFile, 'utf-8');
 
                 if(version >= 1.7){
 
