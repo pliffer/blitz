@@ -12,7 +12,7 @@ module.exports = {
 
     setup(program){
 
-        program.option('-i, --install <text>', 'Install a repo');
+        program.option('-i, --install [text...]', 'Install a repo');
 
         return module.exports;
 
@@ -24,6 +24,15 @@ module.exports = {
         let appName   = false;
         let run       = true;
         let env       = true;
+        let originalOpt = opt;
+
+        if(opt instanceof Array){
+
+            opt = opt[0];
+
+            if(originalOpt[1]) finalName = originalOpt[1];
+
+        }
 
         if(typeof opts.finalName != 'undefined') finalName = opts.finalName;
         if(typeof opts.appName   != 'undefined') appName   = opts.appName;

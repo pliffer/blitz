@@ -221,17 +221,17 @@ let Util = {
 
 				if(/node_modules/.test(entryPath)) return;
 				if(/platforms\/android/.test(entryPath)) return;
+                if(/plugins\/cordova/.test(entryPath)) return;
                 if(/\.git/.test(entryPath)) return;
-				if(/plugins\/cordova/.test(entryPath)) return;
 
 				let stat = fs.lstatSync(entryPath)
+
+                entries.push(entryPath);
 
 				if(!stat.isFile()){
 
 					Util.populateRecursively(entryPath, entries);
 
-				} else{
-					entries.push(entryPath);
 				}
 
 			});

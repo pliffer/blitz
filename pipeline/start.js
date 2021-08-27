@@ -1,8 +1,6 @@
-const request = require('request');
-const path    = require('path');
-const fs      = require('fs-extra');
-const mysql   = require('mysql');
-const cp      = require('child_process');
+const path = require('path');
+const fs   = require('fs-extra');
+const cp   = require('child_process');
 
 let Util = require('../util.js');
 
@@ -74,15 +72,73 @@ module.exports = {
     activeSpawn: null,
     running: false,
 
+    restart(){
+
+    },
+
+    bg(){
+
+        let spawn = module.exports.activeSpawn;
+
+        console.log(`@info Processo ligado em ${spawn.pid}, ${"blitz fg".green} para retornar`);
+
+        Util.setCache('background-processes', {
+            pid: spawn.pid,
+            args: spawn.spawnargs
+        });
+
+        module.exports.activeSpawn = null;
+
+        module.exports.exitHandler({
+            exit: true,
+            bg: true
+        });
+
+    },
+
+    exiting: false,
+
+    exitHandler(options){
+
+        if(module.exports.exiting) return;
+
+        module.exports.exiting = true;
+
+        if(module.exports.activeSpawn){
+
+            module.exports.activeSpawn.stdin.end();
+            module.exports.activeSpawn.kill();
+
+            if(!options.bg){
+
+                console.log(`\n`)
+                console.log(`@info Exited due user exit command`.blue)
+                console.log(`@info Use bg for running this process on background`.yellow);
+            }
+
+        }
+
+        if(options.exit) process.exit();
+
+    },
+
     run(folder){
+
+        process.on('exit', module.exports.exitHandler.bind(null,{cleanup:true}))
+
+        // catches ctrl+c
+        process.on('SIGINT', module.exports.exitHandler.bind(null, {exit:true}))
+
+        // catches "kill pid"
+        process.on('SIGUSR1', module.exports.exitHandler.bind(null, {exit:true}))
+        process.on('SIGUSR2', module.exports.exitHandler.bind(null, {exit:true}))
+
+        // catches uncaught exceptions
+        process.on('uncaughtException', module.exports.exitHandler.bind(null, {exit:true}))
 
         let middle = '';
 
-        if(folder){
-
-            middle = folder;
-
-        }
+        if(folder) middle = folder;
 
         let packagePath = path.join(process.cwd(), middle, 'package.json');
 
@@ -105,13 +161,13 @@ module.exports = {
 
             process.stdin.setEncoding('utf8');
 
-            process.stdin.on('keypress', (key, data) => {
-
-                console.log('KEYPRESS', key, data);
-
-            });
-
             process.stdin.on('data', (data) => {
+
+                if(data.trim() == 'bg'){
+
+                    return module.exports.bg();
+
+                }
 
                 if(data.trim() == 'rs'){
 
@@ -149,7 +205,7 @@ module.exports = {
                 cwd: path.join(process.cwd(), middle),
                 stdio: ['pipe', 'pipe', 'pipe'],
                 env: process.env,
-                // detached: true,
+                detached: true,
 
                 callback: spawn => {
 
