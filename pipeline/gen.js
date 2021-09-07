@@ -56,15 +56,17 @@ servers:
 
                 for(originalMethod in routes[route]){
 
-                    let responses = routes[route][originalMethod].responses;
-
                     let jwt = false;
 
-                    let method = originalMethod;
+                    let method = originalMethod.replace('jwt.', '');
 
-                    if(originalMethod.substr(0, 4) === 'jwt.'){
-                        jwt = true;
-                        method = originalMethod.substr(4);
+                    // let responses = routes[route][originalMethod].responses;
+                    let responses = {};
+
+                    if(validate[route] && validate[route][method] && validate[route][method].output){
+
+                        responses = validate[route][method].output;
+
                     }
 
                     let summary = '' || routes[route][originalMethod].summary || routes[route][originalMethod].description;
@@ -91,15 +93,6 @@ servers:
                             content += `                 type: object\n`
                             content += `                 properties:\n`
 
-                            // content += `                '${code}':\n`
-                            // content += `                    description: ${responses[code].description}\n`
-                            // content += `                    content:\n`
-                            // content += `                        application/json:\n`
-                            // content += `                            schema:\n`
-                            // content += `                                type: object\n`
-                            // // content += `                                required: "object"\n`
-                            // content += `                                properties:\n`
-
                             for(property in responses[code].properties){
 
                                 content += `                   ${property}:\n`
@@ -109,11 +102,11 @@ servers:
 
                         }
 
-                        if(validate[route] && validate[route][method]){
+                        if(validate[route] && validate[route][method] && validate[route][method].input){
 
-                            for(prop in validate[route][method]){
+                            for(prop in validate[route][method].input){
 
-                                let parameter = validate[route][method][prop];
+                                let parameter = validate[route][method].input[prop];
 
                                 switch(method){
                                     case 'get':
@@ -152,39 +145,53 @@ servers:
                             switch(method){
                                 case 'post':
 
-                                    content += `        requestBody:\n`
+                                    if(Object.keys(validate[route][method].input).length){
 
-                                    // @todo Verificar casos em que não precisa ser true
-                                    content += `          required: true\n`
-                                    content += `          content:\n`
-                                    content += `            application/json:\n`
-                                    content += `              schema:\n`
-                                    content += `                type: object\n`
+                                        content += `        requestBody:\n`
 
-                                    content += `                required:\n`
-                                    for(prop in validate[route][method]){
+                                        // @todo Verificar casos em que não precisa ser true
+                                        content += `          required: true\n`
+                                        content += `          content:\n`
+                                        content += `            application/json:\n`
+                                        content += `              schema:\n`
+                                        content += `                type: object\n`
 
-                                        let parameter = validate[route][method][prop];
+                                        content += `                required:\n`
 
-                                        if(parameter.required){
+                                        for(prop in validate[route][method].input){
 
-                                            content += `                - ${prop}\n`
+                                            let parameter = validate[route][method].input[prop];
+
+                                            if(parameter.required){
+
+                                                content += `                - ${prop}\n`
+
+                                            }
 
                                         }
 
-                                    }
+                                        content += `                properties:\n`
 
-                                    content += `                properties:\n`
+                                        for(prop in validate[route][method].input){
 
-                                    for(prop in validate[route][method]){
+                                            let parameter = validate[route][method].input[prop];
 
-                                        let parameter = validate[route][method][prop];
+                                            content += `                  ${prop}:\n`
 
-                                        content += `                  ${prop}:\n`
+                                            if(parameter.type){
 
-                                        if(parameter.type){
+                                                content += `                    type: ${parameter.type}\n`
 
-                                            content += `                    type: ${parameter.type}\n`
+                                                if(parameter.type == 'array'){
+
+                                                    console.log(route, parameter);
+
+                                                    content += `                    items:\n`
+                                                    content += `                      type: ${parameter.itemsType}\n`
+
+                                                }
+
+                                            }
 
                                         }
 
@@ -199,43 +206,9 @@ servers:
 
                     }
 
-                    // content += `            parameters:\n`
-
                 }
 
             });
-
-        // 200: {
-
-        //     description: 'Retorna um JWT',
-
-        //     properties: {
-
-        //         success: {
-        //             type: 'bool'
-        //         },
-
-        //         message: {
-        //             type: 'array'
-        //         },
-
-        //         unixtime: {
-        //             type: 'int32'
-        //         }
-
-        //     }
-
-        // }
-
-    // Tag:
-    //   type: object
-    //   properties:
-    //     id:
-    //       type: integer
-    //       format: int64
-    //     name:
-    //       type: string
-
 
             console.log(content);
 

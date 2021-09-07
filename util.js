@@ -1,3 +1,4 @@
+const inquirer = require('inquirer');
 const Prompt   = require('prompt-password');
 const dotenv   = require('dotenv');
 const path     = require('path');
@@ -773,6 +774,27 @@ let Util = {
 
             spawn.on('exit', resolve);
             spawn.on('error', reject);
+
+        });
+
+    },
+
+    log(msg){
+
+        // @todo Verbose
+
+        console.log(`@log ${msg}`);
+
+    },
+
+    ask(question){
+
+        return inquirer.prompt({
+            name: 'answer',
+            message: question
+        }).then(answer => {
+
+            return answer.answer;
 
         });
 

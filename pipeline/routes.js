@@ -17,6 +17,114 @@ module.exports = {
 
     },
 
+    async list(){
+
+        let routesFolder = path.join(process.cwd(), 'app', 'routes');
+
+        if(!fs.existsSync(routesFolder)){
+
+            return console.log(`@err It is necessary to have app/routes`);
+
+        }
+
+        let apiTestsAvailable = {};
+        let ret = {};
+
+        let apiTests = path.join(process.cwd(), 'doc', 'tests', 'api');
+
+        if(fs.existsSync(apiTests)){
+
+            fs.readdirSync(apiTests).forEach(apiTest => {
+
+                let apiTestsFiles = fs.readdirSync(path.join(apiTests, apiTest));
+
+                apiTestsFiles.forEach(testFile => {
+
+                    if(testFile == 'preload.js') return;
+                    if(testFile.indexOf('.js') == -1) return;
+
+                    let fileName = path.join(apiTests, apiTest, testFile);
+
+                    let requiredTestFile = require(fileName);
+
+                    let test = requiredTestFile.test;
+
+                    if(!test && requiredTestFile.url){
+
+                        test = requiredTestFile;
+
+                    }
+
+                    if(test && test.enabled !== false){
+
+                        if(!apiTestsAvailable[test.url]){
+
+                            apiTestsAvailable[test.url] = {};
+
+                        }
+
+                        apiTestsAvailable[test.url][test.method] = requiredTestFile;
+
+                    }
+
+                });
+
+            });
+
+        }
+
+        let routes = fs.readdirSync(routesFolder);
+
+        routes.forEach(route => {
+
+            let routeFile = path.join(routesFolder, route);
+
+            let content = fs.readFileSync(routeFile, 'utf-8');
+
+            let maxNumber = 15;
+
+            content.split("\n").forEach(line => {
+
+                let match = line.match(/router\.((jwt\.post|jwt\.get|jwt\.put|jwt\.delete|get|post|put|delete))\((`|"|')(.+?)(`|"|'),/);
+
+                if(match){
+
+                    let type = match[1];
+
+                    let prefix = " ".repeat(maxNumber - type.length);
+
+                    line = prefix + line.trim().replace(type, type.yellow);
+
+                    let url = match[4];
+
+                    if(apiTestsAvailable[url] && apiTestsAvailable[url][type]){
+
+                        ret[url] = JSON.parse(JSON.stringify(apiTestsAvailable[url]));
+
+                        delete apiTestsAvailable[url][type];
+
+                    } else{
+
+                        if(typeof ret[url] == 'undefined'){
+
+                            ret[url] = {}
+
+                        }
+
+                        ret[url][type] = {}
+
+                    }
+
+                }
+
+            });
+
+        });
+
+        return ret; 
+
+    },
+
     run(dirs, opts){
 
         console.log("@todo Exibir aqui os testes cube que ainda faltam existir (exibri quantos há)")
@@ -56,7 +164,7 @@ module.exports = {
 
                     }
 
-                    if(test){
+                    if(test && test.enabled !== false){
 
                         if(!apiTestsAvailable[test.url]){
 
@@ -135,7 +243,7 @@ module.exports = {
 
             for(method in apiTestsAvailable[test]){
             
-                console.log(`@info Rota indefinida [${method}]${test}`.yellow);
+                console.log(`@info Rota indefinida ${method}('${test}')`.yellow);
 
             }
 
