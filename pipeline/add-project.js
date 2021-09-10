@@ -9,7 +9,7 @@ module.exports = {
 
     setup(program){
 
-        program.option('--set-project <path>', 'Save a folder as a project for later use');
+        program.option('--add-project <path>', 'Save a folder as a project for later use');
 
         return module.exports;
 

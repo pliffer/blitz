@@ -23,6 +23,8 @@ module.exports = {
 
             case 'prestashop1.7':
 
+                fs.ensureDirSync(projName);
+
                 // @todo Criar as instalações dentro de install/ pois assim será apagado durante o término
                 // da instalação, garantindo segurança(pois os arquivos gerados podem ser sensíveis)
 
@@ -106,6 +108,8 @@ X. (Opcional) 'sudo certbot certonly -d <dominio>' # para gerar o certificado HT
 
             case 'electron':
 
+                fs.ensureDirSync(projName);
+
                 global.pipeline.install.run('kugel', {
                     run: false,
                     finalName: projName
@@ -142,7 +146,9 @@ X. (Opcional) 'sudo certbot certonly -d <dominio>' # para gerar o certificado HT
 
             break;
             default:
+
                 console.log(`@err Option ${opts.base} not registred`);
+
             break;
 
         }
@@ -178,11 +184,6 @@ X. (Opcional) 'sudo certbot certonly -d <dominio>' # para gerar o certificado HT
     run(projName, opts){
 
         if(fs.existsSync(projName) && !opts.irrigate) return console.log(`@err ${projName} folder already exists`);
-        else{
-
-            fs.ensureDirSync(projName);
-
-        }
 
         console.log(`@info Creating ${projName}`);
 
