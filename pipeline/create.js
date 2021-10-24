@@ -21,6 +21,32 @@ module.exports = {
 
         switch(opts.base){
 
+            case 'wordpress':
+                    
+                fs.ensureDirSync(projName);
+
+                // @todo Criar as instalações dentro de install/ pois assim será apagado durante o término
+                // da instalação, garantindo segurança(pois os arquivos gerados podem ser sensíveis)
+
+                return Util.inheritSpawn(['wget', 'https://br.wordpress.org/latest-pt_BR.zip', '-nc']).then(() => {
+
+                    return Util.inheritSpawn(['unzip', 'latest-pt_BR.zip', '-d', 'latest-pt_BR-wp']);
+
+                }).then(() => {
+
+                    // return Util.inheritSpawn(['unzip', 'latest-pt_BR-wp/prestashop.zip', '-d', cwd]);
+
+                }).then(() => {
+
+                    // return Util.inheritSpawn(['rm', '-r', 'prestashop_1.7.7.5']);
+                    
+                }).then(() => {
+
+                    // return Util.inheritSpawn(['mkdir', projName + '/blitz']);
+
+                });
+
+            break;
             case 'prestashop1.7':
 
                 fs.ensureDirSync(projName);
@@ -43,7 +69,6 @@ module.exports = {
                 }).then(() => {
 
                     return Util.inheritSpawn(['mkdir', projName + '/blitz']);
-                    
                 }).then(() => {
 
                     // @todo Isso aqui tem que rodar ao término
