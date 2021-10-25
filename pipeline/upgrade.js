@@ -18,21 +18,27 @@ module.exports = {
 
         let cwd = path.resolve(__dirname, '../');
 
-        Util.run('git pull origin master', data => {
+        Util.run('git stash', () => {
 
-            if(~data.indexOf('Already up-to-date.')){
+            Util.run('git pull origin master', data => {
 
-                console.log('@info Nada a atualizar');
+                if(~data.indexOf('Already up-to-date.')){
 
-            }
+                    console.log('@info Nada a atualizar');
 
-            let matches = data.match(/Updating\s+[a-z0-9]{7}\.\.[a-z0-9]{7}/g);
+                }
 
-            if(matches && matches.length){
+                let matches = data.match(/Updating\s+[a-z0-9]{7}\.\.[a-z0-9]{7}/g);
 
-                console.log('@info Blitz atualizado para nova versão');
+                if(matches && matches.length){
 
-            }
+                    console.log('@info Blitz atualizado para nova versão');
+
+                }
+
+            }, {
+                cwd: cwd
+            });
 
         }, {
             cwd: cwd
