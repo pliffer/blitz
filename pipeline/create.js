@@ -42,7 +42,7 @@ module.exports = {
 
                 }).then(() => {
 
-                    return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', cwd + '-theme']);
+                    return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', cwd + '-theme')]);
 
                 });
 
