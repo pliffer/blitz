@@ -22,8 +22,6 @@ module.exports = {
         switch(opts.base){
 
             case 'wordpress':
-                    
-                fs.ensureDirSync(projName);
 
                 // @todo Criar as instalações dentro de install/ pois assim será apagado durante o término
                 // da instalação, garantindo segurança(pois os arquivos gerados podem ser sensíveis)
