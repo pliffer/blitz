@@ -32,22 +32,22 @@ module.exports = {
 
                     console.log('Unpacking')
 
-                    return Util.inheritSpawn(['unzip', 'latest-pt_BR.zip', '-d', 'latest-pt_BR-wp']);
+                    // return Util.inheritSpawn(['unzip', 'latest-pt_BR.zip', '-d', 'latest-pt_BR-wp']);
 
                 }).then(() => {
                     console.log('moving')
 
-                    return Util.inheritSpawn(['mv', 'latest-pt_BR-wp/wordpress', cwd]);
+                    // return Util.inheritSpawn(['mv', 'latest-pt_BR-wp/wordpress', cwd]);
 
                 }).then(() => {
 
                     console.log('blank-theme')
-                    return Util.inheritSpawn(['wget', 'https://access.pliffer.com.br/public/blitz/blank-theme.zip', '-nc'])
+                    // return Util.inheritSpawn(['wget', 'https://access.pliffer.com.br/public/blitz/blank-theme.zip', '-nc'])
 
                 }).then(() => {
                     console.log('unziping')
 
-                    return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', cwd + '-theme']);
+                    // return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', cwd + '-theme']);
 
                 });
 
