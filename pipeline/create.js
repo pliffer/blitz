@@ -36,11 +36,23 @@ module.exports = {
 
                 }).then(() => {
 
+                    return Util.inheritSpawn(['rm', '-r', 'latest-pt_BR-wp']);
+
+                }).then(() => {
+
+                    return Util.inheritSpawn(['rm', 'latest-pt_BR.zip']);
+
+                }).then(() => {
+
                     return Util.inheritSpawn(['wget', 'https://access.pliffer.com.br/public/blitz/blank-theme.zip', '-nc'])
 
                 }).then(() => {
 
-                    return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', cwd + '-theme')]);
+                    return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', projName + '-theme')]);
+
+                }).then(() => {
+
+                    return Util.inheritSpawn(['rm', 'blank-theme.zip']);
 
                 });
 
