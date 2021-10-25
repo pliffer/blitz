@@ -26,7 +26,9 @@ module.exports = {
 
             }
 
-            if(~data.indexOf(/Updating\s+[a-z0-9]{7}\.\.[a-z0-9]{7}/g)){
+            let matches = data.match(/Updating\s+[a-z0-9]{7}\.\.[a-z0-9]{7}/g);
+
+            if(matches && matches.length){
 
                 console.log('@info Blitz atualizado para nova versão');
 
