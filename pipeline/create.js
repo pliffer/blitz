@@ -34,15 +34,15 @@ module.exports = {
 
                 }).then(() => {
 
-                    // return Util.inheritSpawn(['unzip', 'latest-pt_BR-wp/prestashop.zip', '-d', cwd]);
+                    return Util.inheritSpawn(['mv', 'latest-pt_BR-wp/wordpress', cwd]);
 
                 }).then(() => {
 
-                    // return Util.inheritSpawn(['rm', '-r', 'prestashop_1.7.7.5']);
-                    
+                    return Util.inheritSpawn(['wget', 'https://access.pliffer.com.br/public/blitz/blank-theme.zip', '-nc'])
+
                 }).then(() => {
 
-                    // return Util.inheritSpawn(['mkdir', projName + '/blitz']);
+                    return Util.inheritSpawn(['unzip', 'blank-theme.zip', '-d', path.join(cwd, 'wp-content/themes', cwd + '-theme']);
 
                 });
 
