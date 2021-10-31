@@ -8,6 +8,8 @@ require('colors');
 
 module.exports = {
 
+    processes: {},
+
     setup(program){
 
         program.option('-s, --start [text]', 'Run a project');
@@ -79,10 +81,10 @@ module.exports = {
         console.log(`@info Restarting ${folder} due ${due} -----------------`.blue)
         console.log(`\n`)
 
-        module.exports.exitHandler.bind(null,{cleanup:true});
-
-        // module.exports.activeSpawn.stdin.end();
-        // module.exports.activeSpawn.kill();
+        module.exports.exitHandler({
+            cleanup: true,
+            spawnProcess: module.exports.activeSpawn
+        });
 
         process.stdin.end();
 
@@ -91,8 +93,6 @@ module.exports = {
     },
 
     bg(){
-
-        let spawn = module.exports.activeSpawn;
 
         console.log(`@info Processo ligado em ${spawn.pid}, ${"blitz fg".green} para retornar`);
 
@@ -103,7 +103,8 @@ module.exports = {
 
         module.exports.exitHandler({
             exit: true,
-            bg: true
+            bg: true,
+            spawnProcess: module.exports.activeSpawn
         });
 
     },
@@ -116,10 +117,16 @@ module.exports = {
 
         module.exports.exiting = true;
 
-        if(module.exports.activeSpawn){
+        let spawnProcess = module.exports.activeSpawn;
 
-            module.exports.activeSpawn.stdin.end();
-            module.exports.activeSpawn.kill();
+        if(options.spawnProcess) spawnProcess = options.spawnProcess;
+
+        if(spawnProcess){
+
+            spawnProcess.stdin.end();
+            spawnProcess.kill();
+
+            module.exports.exiting = false;
 
             if(!options.bg){
 
@@ -136,7 +143,7 @@ module.exports = {
 
     run(folder){
 
-        process.on('exit', module.exports.exitHandler.bind(null,{cleanup:true}))
+        process.on('exit', module.exports.exitHandler.bind(null, {cleanup:true}))
 
         // catches ctrl+c
         process.on('SIGINT', module.exports.exitHandler.bind(null, {exit:true}))
@@ -224,6 +231,11 @@ module.exports = {
                     module.exports.running = true;
                     module.exports.activeSpawn = spawn;
 
+                    module.exports.processes[spawn.pid] = {
+                        running: true,
+                        spawnProcess: spawn
+                    }
+
                     spawn.stdin.on('data', (data) => {
 
                         process.stdout.write(`X-> ${data.toString()}`);
@@ -245,7 +257,7 @@ module.exports = {
                     spawn.on('close', (errorCode) => {
 
                         module.exports.running = false;
-                        
+
                         if(errorCode) errorCode.toString().white;
 
                         if(!errorCode) errorCode = "null";

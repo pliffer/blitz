@@ -23,6 +23,8 @@ module.exports = {
 
         if(module.exports.watched.includes(src)) return;
 
+        console.log(`@info Observando a pasta ${src.green}`);
+
         module.exports.watched.push(src);
 
         let watcher = chokidar.watch(src, {
