@@ -72,7 +72,21 @@ module.exports = {
     activeSpawn: null,
     running: false,
 
-    restart(){
+    // @todo Talvez não seja a melor ideia passar folder aqui e seja melhor pegar pelo activeSpawn
+    restart(folder, due = 'user rs command'){
+
+        console.log(`\n`)
+        console.log(`@info Restarting ${folder} due ${due} -----------------`.blue)
+        console.log(`\n`)
+
+        module.exports.exitHandler.bind(null,{cleanup:true});
+
+        // module.exports.activeSpawn.stdin.end();
+        // module.exports.activeSpawn.kill();
+
+        process.stdin.end();
+
+        module.exports.run(folder);
 
     },
 
@@ -86,8 +100,6 @@ module.exports = {
             pid: spawn.pid,
             args: spawn.spawnargs
         });
-
-        module.exports.activeSpawn = null;
 
         module.exports.exitHandler({
             exit: true,
@@ -171,18 +183,7 @@ module.exports = {
 
                 if(data.trim() == 'rs'){
 
-                    module.exports.running = false;
-
-                    module.exports.activeSpawn.stdin.end();
-                    module.exports.activeSpawn.kill();
-
-                    console.log(`\n`)
-                    console.log(`@info Restarting ${folder} due user rs command -----------------`.blue)
-                    console.log(`\n`)
-
-                    process.stdin.end();
-
-                    module.exports.run(folder);
+                    return module.exports.restart(folder);
 
                 } else{
 
@@ -200,7 +201,18 @@ module.exports = {
 
         return fs.readJson(packagePath).then(project => {
 
-            Util.inheritSpawn(['node', project.main], {
+            // @todo Conseguir rodar outros formatos, sem ser node, como php, magento, prestashop
+            // e isso também detectaria outras necessidades
+            let type       = 'node';
+            let spawnArray = [type, project.main];
+
+            global.pipeline.watch[type](path.join(process.cwd(), middle), () => {
+
+                module.exports.restart(folder, 'file change');
+
+            });
+
+            Util.inheritSpawn(spawnArray, {
 
                 cwd: path.join(process.cwd(), middle),
                 stdio: ['pipe', 'pipe', 'pipe'],
