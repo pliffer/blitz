@@ -51,7 +51,7 @@ module.exports = {
         Util.parseJson(blitzPath).then(json => {
 
             console.log(json);
-            console.log("@todo Instalação da dependncia, adição da versão do wp")
+            console.log("@todo Instalação da dependencia, adição da versão do wp")
 
         });
 
@@ -213,11 +213,21 @@ module.exports = {
             let type       = 'node';
             let spawnArray = [type, project.main];
 
+            let config = "";
+
+            if(project.nodemonConfig || project.blitzConfig){
+
+                config = project.nodemonConfig || project.blitzConfig;
+
+                if(config.ignore) config = config.ignore;
+
+            }
+
             global.pipeline.watch[type](path.join(process.cwd(), middle), () => {
 
                 module.exports.restart(folder, 'file change');
 
-            });
+            }, config);
 
             Util.inheritSpawn(spawnArray, {
 

@@ -19,7 +19,9 @@ module.exports = {
 
     watched: [],
 
-    node(src, callback){
+    node(src, callback, patterns){
+
+        if(src.substr(-1) != '/') src = src + '/';
 
         if(module.exports.watched.includes(src)) return;
 
@@ -33,7 +35,19 @@ module.exports = {
 
         watcher.on('change', filePath => {
 
-            if(filePath.substr(-3) == '.js') callback(filePath);
+            let flagContinue = true;
+
+            if(patterns){
+
+                patterns.forEach(pattern => {
+
+                    if(Util.matchPattern(filePath.replace(src, ''), pattern)) flagContinue = false;
+
+                });
+
+            }
+
+            if(flagContinue && filePath.substr(-3) == '.js') callback(filePath);
 
         });
 
