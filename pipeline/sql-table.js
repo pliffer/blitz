@@ -1,3 +1,5 @@
+let fs = require('fs-extra');
+
 let Util = require('../util.js');
 
 module.exports = {
@@ -5,12 +7,13 @@ module.exports = {
     setup(program){
 
         program.option('--sql-table <sql>', 'Output in relational data (openable by excel) with an sql input');
+        program.option('--output <filename>', 'Output relational data to a filename');
 
         return module.exports;
 
     },
 
-    async run(sql){
+    async run(sql, options){
 
         let env = await Util.getEnv();
 
@@ -22,17 +25,23 @@ module.exports = {
 
         }
 
-        console.log(`-- @info ${env.MYSQL_USER.green}@${env.MYSQL_HOST.green} (db: ${env.MYSQL_DB.green})`);
+        let totalData = "";
 
-        let filename = env.MYSQL_DB + '_' + new Date().getTime() + '_' + new Date().toDateString().replace(/\s+/g, '_') + '.tsv';
+        Util.spawn(['mysql', '-h', env.MYSQL_HOST, '-u', env.MYSQL_USER, env.MYSQL_DB, '-p' + env.MYSQL_PASS, '-B', '-e', `${sql}`], (data) => {
 
-        Util.exec('mysql', `-h ${env.MYSQL_HOST} -u ${env.MYSQL_USER} -p${env.MYSQL_PASS} -B -e "${sql}" > ${filename}`, data => {
-
-            console.log(data);
+            totalData += data;
 
         }).then(() => {
 
-            console.log('-- @info Arquivo formado: ' + filename);
+            if(options.output){
+
+                return fs.writeFile(options.output, totalData, 'utf-8').then(() => {
+
+                    console.log(`@info Arquivo ${options.output} escrito`);
+
+                });
+
+            }
 
         });
 
