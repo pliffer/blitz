@@ -55,6 +55,14 @@ let Util = {
 
     },
 
+    matchPattern(str, rule){
+
+        var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+
+        return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
+
+    },
+
     treeObj(obj){
 
         var finalObj = false;
@@ -725,6 +733,31 @@ let Util = {
         return new Promise((resolve, reject) => {
 
             return module.exports.spawn(string.split(' '), dataCallback, opts).then(resolve).catch(reject);
+
+        });
+
+    },
+
+    exec(firstArg, args, dataCallback){
+
+        return new Promise((resolve, reject) => {
+
+            let spawn = cp.exec(firstArg + ' ' + args);
+
+            spawn.stdout.on('data', (data) => {
+
+                dataCallback(data.toString(), 'data');
+
+            });
+
+            spawn.stderr.on('data', (data) => {
+
+                dataCallback(data.toString(), 'err');
+
+            });
+
+            spawn.on('exit', resolve);
+            spawn.on('error', reject);
 
         });
 

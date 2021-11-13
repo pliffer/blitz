@@ -84,7 +84,7 @@ module.exports = {
         module.exports.exitHandler({
             cleanup: true,
             spawnProcess: module.exports.activeSpawn
-        });
+        }, 'restart');
 
         process.stdin.end();
 
@@ -105,13 +105,13 @@ module.exports = {
             exit: true,
             bg: true,
             spawnProcess: module.exports.activeSpawn
-        });
+        }, 'bg');
 
     },
 
     exiting: false,
 
-    exitHandler(options){
+    exitHandler(options, msg = 'null'){
 
         if(module.exports.exiting) return;
 
@@ -131,7 +131,7 @@ module.exports = {
             if(!options.bg){
 
                 console.log(`\n`)
-                console.log(`@info Exited due user exit command`.blue)
+                console.log(`@info Exited due user exit command (${msg})`.blue)
                 console.log(`@info Use bg for running this process on background`.yellow);
             }
 
@@ -141,19 +141,28 @@ module.exports = {
 
     },
 
+    runned: false,
+
     run(folder){
 
-        process.on('exit', module.exports.exitHandler.bind(null, {cleanup:true}))
+        // Adiciona os listeners de saída apenas a primeira vez
+        if(!module.exports.runned){
 
-        // catches ctrl+c
-        process.on('SIGINT', module.exports.exitHandler.bind(null, {exit:true}))
+            process.on('exit', module.exports.exitHandler.bind(null, {cleanup:true}, 'exit'))
 
-        // catches "kill pid"
-        process.on('SIGUSR1', module.exports.exitHandler.bind(null, {exit:true}))
-        process.on('SIGUSR2', module.exports.exitHandler.bind(null, {exit:true}))
+            // catches ctrl+c
+            process.on('SIGINT', module.exports.exitHandler.bind(null, {exit:true}, 'SIGINT'))
 
-        // catches uncaught exceptions
-        process.on('uncaughtException', module.exports.exitHandler.bind(null, {exit:true}))
+            // catches "kill pid"
+            process.on('SIGUSR1', module.exports.exitHandler.bind(null, {exit:true}, 'SIGUSR1'))
+            process.on('SIGUSR2', module.exports.exitHandler.bind(null, {exit:true}, 'SIGUSR2'))
+
+            // catches uncaught exceptions
+            process.on('uncaughtException', module.exports.exitHandler.bind(null, {exit:true}, 'uncaughtException'))
+
+            module.exports.runned = true;
+
+        }
 
         let middle = '';
 
