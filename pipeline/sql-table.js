@@ -41,6 +41,10 @@ module.exports = {
 
                 });
 
+            } else{
+
+                process.stdout.write(totalData);
+
             }
 
         });
