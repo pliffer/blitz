@@ -21,6 +21,57 @@ module.exports = {
 
         switch(opts.base){
 
+            case 'module':
+
+                cwd = process.cwd();
+                let moduleName;
+                let description = '';
+
+                Util.ask('Qual o nome do módulo?').then(_moduleName => {
+
+                    moduleName = _moduleName;
+
+                    return fs.exists(path.join(cwd, moduleName));
+
+                }).then(exists => {
+
+                    if(exists) return Promise.reject('@info Já existe uma pasta com esse nome');
+
+                    return Util.ask('Qual a descrição do módulo?')
+
+                }).then(_description => {
+
+                    description = _description;
+
+                    return Util.inheritSpawn(['mkdir', moduleName]);
+
+                }).then(() => {
+
+                    cwd = path.join(cwd, moduleName);
+
+                    return fs.writeFile(path.join(cwd, 'package.json'), `{
+    "name": "${moduleName}",
+    "version": "1.0.0",
+    "description": "${description}",
+    "main": "${moduleName}.js",
+    "author": "${process.env.USER}",
+    "license": "MIT",
+    "dependencies": {}
+}`);
+                }).then(() => {
+
+                    return fs.writeFile(path.join(cwd, `${moduleName}.js`), `module.exports = {
+    files: {
+        // @info Declare your folders here
+    }
+}`);
+                }).then(() => {
+
+                    return Util.open(path.join(cwd, `${moduleName}.js`));
+
+                });
+
+            break;
             case 'wordpress':
 
                 // @todo Criar as instalações dentro de install/ pois assim será apagado durante o término
@@ -217,6 +268,8 @@ X. (Opcional) 'sudo certbot certonly -d <dominio>' # para gerar o certificado HT
     },
 
     run(projName, opts){
+
+        if(projName == 'module') opts.base = projName;
 
         if(fs.existsSync(projName) && !opts.irrigate) return console.log(`@err ${projName} folder already exists`);
 

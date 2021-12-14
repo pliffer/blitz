@@ -259,48 +259,54 @@ let Util = {
 
         return new Promise((resolve, reject) => {
 
-            fs.readdirSync(entriesPath).forEach(entry => {
+            fs.exists(entriesPath).then(exists => {
 
-                let entryPath = path.join(entriesPath, entry);
+                if(!exists) return;
 
-                if(/node_modules/.test(entryPath)) return;
-                if(/platforms\/android/.test(entryPath)) return;
-                if(/\.git/.test(entryPath)) return;
-                if(/plugins\/cordova/.test(entryPath)) return;
-                if(/cache/.test(entryPath)) return;
+                fs.readdirSync(entriesPath).forEach(entry => {
 
-                let ext = path.extname(entry);
+                    let entryPath = path.join(entriesPath, entry);
 
-                if(module.exports.ignorableExt.includes(ext)) return;
+                    if(/node_modules/.test(entryPath)) return;
+                    if(/platforms\/android/.test(entryPath)) return;
+                    if(/\.git/.test(entryPath)) return;
+                    if(/plugins\/cordova/.test(entryPath)) return;
+                    if(/cache/.test(entryPath)) return;
 
-                let stat = fs.lstatSync(entryPath)
+                    let ext = path.extname(entry);
 
-                // Se for acima de 5mb, ignora
-                if(stat.size / 1024 / 1024 > 5){
-                    return;
-                }
+                    if(module.exports.ignorableExt.includes(ext)) return;
 
-                if(!stat.isFile()){
+                    let stat = fs.lstatSync(entryPath)
 
-                    Util.forEachEntry(entryPath, callback);
+                    // Se for acima de 5mb, ignora
+                    if(stat.size / 1024 / 1024 > 5){
+                        return;
+                    }
 
-                } else{
+                    if(!stat.isFile()){
 
-                    if(opt.content){
-                        
-                        callback(entryPath, fs.readFileSync(entryPath, 'utf-8'));
+                        Util.forEachEntry(entryPath, callback);
 
                     } else{
 
-                        callback(entryPath);
+                        if(opt.content){
+                            
+                            callback(entryPath, fs.readFileSync(entryPath, 'utf-8'));
 
-                    }                    
+                        } else{
 
-                }
+                            callback(entryPath);
+
+                        }                    
+
+                    }
+
+                });
+
+                resolve();
 
             });
-
-            resolve();
 
         });
 
