@@ -57,9 +57,22 @@ let Util = {
 
     matchPattern(str, rule){
 
+        let notMatch = false;
+
+        if(rule[0] == '!'){
+
+            notMatch = true;
+            rule = rule.substr(1);
+
+        }
+
         var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 
-        return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
+        let test = new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
+
+        if(notMatch) test = !test;
+
+        return test;
 
     },
 
@@ -289,6 +302,76 @@ let Util = {
                         Util.forEachEntry(entryPath, callback);
 
                     } else{
+
+                        if(opt.content){
+                            
+                            callback(entryPath, fs.readFileSync(entryPath, 'utf-8'));
+
+                        } else{
+
+                            callback(entryPath);
+
+                        }                    
+
+                    }
+
+                });
+
+                resolve();
+
+            });
+
+        });
+
+    },
+
+    forEachMatch(entriesPath, match, callback, opt = {}){
+
+        if(!opt.content) opt.content = true;
+
+        if(!match instanceof Array){
+            match = [match];
+        }
+
+        return new Promise((resolve, reject) => {
+
+            fs.exists(entriesPath).then(exists => {
+
+                if(!exists) return;
+
+                fs.readdirSync(entriesPath).forEach(entry => {
+
+                    let entryPath = path.join(entriesPath, entry);
+
+                    if(/node_modules/.test(entryPath)) return;
+                    if(/\.git/.test(entryPath)) return;
+
+                    let ext = path.extname(entry);
+
+                    let stat = fs.lstatSync(entryPath)
+
+                    // Se for acima de 5mb, ignora
+                    if(stat.size / 1024 / 1024 > 5){
+                        return;
+                    }
+
+                    if(!stat.isFile()){
+
+                        Util.forEachMatch(entryPath, match, callback);
+
+                    } else{
+
+                        let flagContinue = false;
+
+                        for(let i = 0; i < match.length; i++){
+
+                            // console.log(entry, match[i], Util.matchPattern(entry, match[i]))
+
+                            if(Util.matchPattern(entry, match[i])) flagContinue = true;
+
+                        }
+
+                        if(!flagContinue) return;
 
                         if(opt.content){
                             
