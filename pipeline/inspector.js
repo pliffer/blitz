@@ -35,8 +35,6 @@ module.exports = {
 
                 entry = entry.replace(cwd, '');
 
-                if(entry !== '/module.js') return;
-
                 let newContent = "";
 
                 let change = false;
