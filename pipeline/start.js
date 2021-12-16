@@ -158,7 +158,13 @@ module.exports = {
             process.on('SIGUSR2', module.exports.exitHandler.bind(null, {exit:true}, 'SIGUSR2'))
 
             // catches uncaught exceptions
-            process.on('uncaughtException', module.exports.exitHandler.bind(null, {exit:true}, 'uncaughtException'))
+            process.on('uncaughtException', (e) => {
+
+                console.log(e);
+
+                module.exports.exitHandler.bind(null, {exit:true}, 'uncaughtException');
+
+            });
 
             module.exports.runned = true;
 

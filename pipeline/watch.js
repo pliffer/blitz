@@ -30,7 +30,8 @@ module.exports = {
         module.exports.watched.push(src);
 
         let watcher = chokidar.watch(src, {
-            persistent: true
+            persistent: true,
+            ignored: (path) => path.includes('node_modules')
         });
 
         watcher.on('change', filePath => {
