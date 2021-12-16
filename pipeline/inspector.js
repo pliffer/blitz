@@ -21,7 +21,7 @@ module.exports = {
 
     getApplyFunction(entry, line, k){
 
-        return `console.log("@inspector ${entry}:${k+1}")`;
+        return `console.log("@inspector ${entry}:${k+1} at ${new Date().getTime()}")`;
 
     },
 
