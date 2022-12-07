@@ -32,6 +32,8 @@ module.exports = {
 
                 Util.lineLog('Analisando arquivo: ' + entry);
 
+                dir = dir.replace('.\\', '');
+
                 let cleanEntry = entry.replace(dir, '');
 
                 if(typeof files[cleanEntry] == 'undefined'){
@@ -164,6 +166,8 @@ module.exports = {
             });
 
             res.notFound.forEach(notFound => {
+
+                console.log(notFound)
 
                 if(opts.kugel){
 
