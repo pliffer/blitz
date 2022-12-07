@@ -32,9 +32,10 @@ module.exports = {
 
                 Util.lineLog('Analisando arquivo: ' + entry);
 
-                dir = dir.replace('.\\', '');
+                // Remove alguns caracteres que impedem o comparativo
+                let dirStd = dir.replace('.\\', '');
 
-                let cleanEntry = entry.replace(dir, '');
+                let cleanEntry = entry.replace(dirStd, '');
 
                 if(typeof files[cleanEntry] == 'undefined'){
 
