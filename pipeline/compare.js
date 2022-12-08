@@ -35,6 +35,8 @@ module.exports = {
                 // Remove alguns caracteres que impedem o comparativo
                 let dirStd = dir.replace('.\\', '');
 
+                dirStd = dirStd.replaceAll('/', path.sep);
+
                 let cleanEntry = entry.replace(dirStd, '');
 
                 if(typeof files[cleanEntry] == 'undefined'){
