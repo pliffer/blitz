@@ -575,6 +575,8 @@ let Util = {
 
     sintaxHighlight(txt, lang = 'js'){
 
+        if(!txt) txt= '';
+
         let parsed = txt;
 
         parsed = parsed.replace('let', 'let'.italic.blue);
