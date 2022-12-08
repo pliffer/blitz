@@ -159,16 +159,11 @@ module.exports = {
 
                 console.log('Arquivo ' + (++iteration) + ' ' + diff.filename.magenta + ':' + (diff[0].line+1).toString().yellow);
 
-                Util.showDiff({
-                    file1: dirs[0] + diff.filename,
-                    file2: dirs[1] + diff.filename
-                }, diff[0], module.exports.columns);
+                Util.showDiff(diff[0].data1, diff[0].data2, diff[0].line);
 
             });
 
             res.notFound.forEach(notFound => {
-
-                console.log(notFound)
 
                 if(opts.kugel){
 
