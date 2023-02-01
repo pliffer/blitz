@@ -24,6 +24,7 @@
     "opn": "^6.0.0",
     "prompt-password": "^1.2.0",
     "request": "^2.88.2",
+    "sharp": "^0.31.3",
     "virtualenv": "github:pliffer/virtualenv"
   }
 }
