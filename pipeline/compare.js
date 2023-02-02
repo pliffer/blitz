@@ -32,7 +32,12 @@ module.exports = {
 
                 Util.lineLog('Analisando arquivo: ' + entry);
 
-                let cleanEntry = entry.replace(dir, '');
+                // Remove alguns caracteres que impedem o comparativo
+                let dirStd = dir.replace('.\\', '');
+
+                dirStd = dirStd.replaceAll('/', path.sep);
+
+                let cleanEntry = entry.replace(dirStd, '');
 
                 if(typeof files[cleanEntry] == 'undefined'){
 
@@ -156,10 +161,7 @@ module.exports = {
 
                 console.log('Arquivo ' + (++iteration) + ' ' + diff.filename.magenta + ':' + (diff[0].line+1).toString().yellow);
 
-                Util.showDiff({
-                    file1: dirs[0] + diff.filename,
-                    file2: dirs[1] + diff.filename
-                }, diff[0], module.exports.columns);
+                Util.showDiff(diff[0].data1, diff[0].data2, diff[0].line);
 
             });
 

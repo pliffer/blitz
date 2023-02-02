@@ -424,6 +424,12 @@ let Util = {
             let data1 = await fs.readFileSync(file1, 'utf-8');
             let data2 = await fs.readFileSync(file2, 'utf-8');
 
+            data1 = data1.replaceAll("\r\n", "\n");
+            data2 = data2.replaceAll("\r\n", "\n");
+
+            data1 = data1.replaceAll("\r", "\n");
+            data2 = data2.replaceAll("\r", "\n");
+
             data1 = data1.split("\n");
             data2 = data2.split("\n");
 
@@ -492,183 +498,92 @@ let Util = {
 
     },
 
-    showDiff(files, diff, columns){
+    showDiff(content1, content2, lineChange){
 
-        let subjects = [];
+        let lines = "";
+        const space = ' ';
 
-        let maxLength = 0;
+        let hightestColumn = 0;
+        let totalLines = 5;
 
-        let maxAllowed = Math.floor(columns/2) - 10;
+        let from = lineChange - (totalLines-1)/2;
+        let to   = lineChange + (totalLines-1)/2;
 
-        let begin = -4;
-        let end   = Math.abs(begin) + 1;
+        let highestLine = content1.length;
 
-        if(i+diff.line < 0) begin = 0;
+        if(content2.length > highestLine){
 
-        let modLine = diff.line;
+            highestLine = content2.length;
 
-        let equalLineNumber = -1;
-        let equalLine = "";
-
-        let maxLineLength = diff.data1.length;
-
-        if(diff.data2.length > maxLineLength) maxLineLength = diff.data2.length;
-
-        maxLineLength = maxLineLength.toString().length;
-
-        diff.data2.forEach((line, lineNumber) => {
-
-            if(lineNumber < modLine) return;
-
-            if(line == diff.data1[modLine]){
-                equalLine = line;
-                equalLineNumber = lineNumber;
-            }
-
-        });
-
-        for(var i = begin; i < end; i++){
-
-            let left  = diff.data1[i + diff.line];
-            let right = diff.data2[i + diff.line];
-
-            if(!left) left = '';
-            if(!right) right = '';
-
-            if(left.length  > maxLength) maxLength = left.length;
-            if(right.length > maxLength) maxLength = right.length;
-
-            if(maxLength > maxAllowed){
-
-                maxLength = maxAllowed;
-
-                left  = left.substr(0,  maxLength);
-                right = right.substr(0, maxLength);
-
-            }
-
-            subjects.push([left, right]);
+            for(let i = 0; i < content1.length - highestLine; i++) content1.push('');
 
         }
 
-        let fileBlankRepeat = maxLength - files.file1.length;
+        highestLine = highestLine.toString();
 
-        if(fileBlankRepeat < 0) fileBlankRepeat = 0;
+        content1.forEach((line, k) => {
 
-        // Mostra o nome dos arquivos acima das linhas
-        console.log(files.file1.cyan + " ".repeat(fileBlankRepeat) + "      | " + files.file2.cyan);
+            content1[k] = line.replaceAll("\t", '    ');
 
-        subjects.forEach((subject, k) => {
+            line = content1[k];
 
-            let bias = 0;
-            let subjectLeft = subject[0];
-            let stepLine = false;
+            if(k < from) return;
+            if(k > to) return;
 
-            if(equalLineNumber > -1){
-
-                bias = equalLineNumber - modLine;
-
-            }
-
-            if(k >= Math.abs(begin) && bias > 0){
-
-                stepLine = k - Math.abs(begin);
-
-                if(k - Math.abs(begin) < bias){
-
-                    subjectLeft = '';
-
-                } else{
-
-                    subjectLeft = subjects[k-bias][0];
-
-                }
-
-            }
-
-            let fill = " ".repeat(maxLength - subjectLeft.length);
-            let line = (diff.line + k + begin + 1);
-
-            let lineLeft = line;
-            let lineRight = line;
-
-            if(stepLine !== false){
-
-                if(stepLine > bias - 1){
-
-                    lineLeft = line - bias;
-
-                } else{
-
-                    lineLeft = ' -';
-
-                }
-
-                if(modLine + end < bias && stepLine > 1){
-
-                    lineLeft = (bias + k + begin + 1);
-
-                    subjectLeft = diff.data1[line+1];
-
-                    let repeatBy = maxLength - subjectLeft.length;
-
-                    if(repeatBy < 0) repeatBy = 0;
- 
-                    fill = " ".repeat(repeatBy);
-
-
-                }
-
-
-            }
-
-            if(lineLeft.toString().length < maxLineLength){
-
-                lineLeft = " ".repeat(maxLineLength - lineLeft.toString().length) + lineLeft.toString();
-
-            }
-
-            if(lineRight.toString().length < maxLineLength){
-
-                lineRight = " ".repeat(maxLineLength - lineRight.toString().length) + lineRight.toString();
-
-            }
-
-            if(lineRight == modLine + 1){
-
-                lineRight = lineRight.toString().blue;
-
-            } else{
-
-                lineRight = lineRight.toString().yellow;
-
-            }
-
-            if(lineLeft == modLine + 1){
-
-                lineLeft = lineLeft.toString().blue;
-
-            } else{
-
-                lineLeft = lineLeft.toString().yellow;
-
-            }
-
-            console.log(lineLeft + ' ' + Util.sintaxHighlight(subjectLeft, 'js') + " " + fill + " | " + lineRight + " " + Util.sintaxHighlight(subject[1], 'js'));
+            if(line.length > hightestColumn) hightestColumn = line.length;
 
         });
 
-        console.log("");
+        hightestColumn += 1;
+
+        content1.forEach((line, k) => {
+
+            if(k < from) return;
+            if(k > to) return;
+
+            let mainLine = false;
+
+            if(k == lineChange) mainLine = true;
+
+            let separator = '|';
+
+            if(line.length < hightestColumn){
+
+                separator = space.repeat(hightestColumn - line.length) + separator;
+
+            }
+
+            let lineNumber = (k+1).toString();
+
+            if(lineNumber.length < to.toString().length){
+
+                lineNumber = (' '.repeat(to.toString().length - lineNumber.length)) + lineNumber.toString();
+
+            }
+
+            if(mainLine) lineNumber = lineNumber.blue;
+            else lineNumber = lineNumber.yellow;
+
+            lines += lineNumber + '. ' + Util.sintaxHighlight(content1[k], 'js') + separator + space + Util.sintaxHighlight(content2[k], 'js');
+            lines += "\n";
+
+        });
+
+        console.log(lines);
 
     },
 
     sintaxHighlight(txt, lang = 'js'){
+
+        if(!txt) txt= '';
 
         let parsed = txt;
 
         parsed = parsed.replace('let', 'let'.italic.blue);
         parsed = parsed.replace('const', 'const'.italic.blue);
         parsed = parsed.replace('var', 'var'.italic.blue);
+
+        parsed = parsed.replaceAll('=', '='.italic.magenta);
 
         parsed = parsed.replace(/\"(.+?)\"/g, '"' + "$1".yellow.italic + '"')
         parsed = parsed.replace(/\'(.+?)\'/g, '\'' + "$1".yellow.italic + '\'')
