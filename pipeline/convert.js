@@ -1,49 +1,85 @@
 const sharp = require('sharp');
-const path  = require('path');
-const fs    = require('fs-extra');
+const ffmpeg = require('fluent-ffmpeg');
+const path = require('path');
+const glob = require('glob');
 
-
-let Util = require('../util.js');
+const IMAGE_FORMATS = ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'gif', 'svg'];
+const AUDIO_FORMATS = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'wma'];
+const VIDEO_FORMATS = ['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv', 'MOV'];
 
 module.exports = {
 
-    setup(program){
-
+    setup(program) {
         program.option('--convert <origin>', 'Convert files');
-        program.option('--to <dest>', '--convert: into another file');
-
+        program.option('--to <dest>', '--convert: into another file format');
         return module.exports;
-
     },
 
-    run(dirs, opts){
+    run(dirs, opts) {
+        if (!opts.convert) return console.log(`@error --convert is required`);
+        if (!opts.to) return console.log(`@error --to is required`);
 
-        if(!opts.convert) return console.log(`@error --convert is required`);
-        if(!opts.to) return console.log(`@error --to is required`);
+        glob(opts.convert, (err, files) => {
 
-        let origin = opts.convert;
-        let to     = opts.to;
+            console.log(files);
 
-        let ext   = path.extname(origin);
-        let name  = path.basename(origin, ext);
-        let toExt = path.extname(to);
+            if (err) return console.error(err);
+        
+            files.forEach(file => {
 
-        if(toExt == '.jpg') toExt = '.jpeg';
+                let origin = file;
 
-        if(ext == toExt) return console.log(`@error --convert and --to must have different extensions`);
+                let ext = path.extname(origin).substr(1);
+                let name = path.basename(origin, path.extname(origin));
+                let to = opts.to.replace('*', name);
 
-        if(!sharp.format[toExt.substr(1)]) return console.log(`@error --to extension ${toExt} is not supported`);
+                let toExt = path.extname(to).substr(1);
 
-        return sharp(origin)[toExt.substr(1)]().toFile(to).then(() => {
+                if (IMAGE_FORMATS.includes(ext) && IMAGE_FORMATS.includes(toExt)) {
 
-            console.log(`@info Converted ${origin} to ${to}`);
+                    sharp(file)[toExt]()
+                    .toFile(to)
+                    .then(() => console.log(`@info Converted ${file} to ${to}`))
+                    .catch(err => console.log(`@error ${err}`));
 
-        }).catch(err => {
+                } else if ([...AUDIO_FORMATS, ...VIDEO_FORMATS].includes(ext) && AUDIO_FORMATS.includes(toExt)) {
+    
+                    return new ffmpeg({ source: origin })
+                      .withNoVideo()
+                      .toFormat(toExt)
+                      .saveToFile(to)
+                      .on('error', (err, stdout, stderr) => {
+                        console.log(`@error ${err.message}`);
+                      })
+                      .on('end', () => {
+                        console.log(`@info Extracted audio from ${origin} to ${to}`);
+                      });
 
-            console.log(`@error ${err}`);
+                } else if (VIDEO_FORMATS.includes(ext) && VIDEO_FORMATS.includes(toExt)) {
 
+                    if(ext === toExt) return console.log(`@error Cannot convert ${ext} to ${toExt} format, please use --compress instead`);
+
+                    console.log('Converting video...', file, to);
+
+                    ffmpeg(file)
+                    .toFormat(toExt)
+                    .on('progress', function(progress) {
+
+                        let percentage = Math.floor(progress.percent);
+
+                        if(percentage < 0) percentage = 0;
+
+                        console.log(`Processing: ${percentage}%  of ${to} done`);
+                    })
+                    .saveToFile(`${to}`)
+                    .on('error', err => console.log(`@error ${err.message}`))
+                    .on('end', () => console.log(`@info Converted video ${file} to ${to}`));
+
+                } else {
+                    console.log(`@error Unsupported file format conversion`);
+                }
+            });
         });
-
     }
 
-}
+};
